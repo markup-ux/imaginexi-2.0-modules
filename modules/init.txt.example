@@ -1,0 +1,113 @@
+# Imagine XI 2.0 — add these lines to your LandSandBoat modules/init.txt
+# Comment a line to disable that feature. Rebuild xi_map if you remove a .cpp.
+
+# --- Jobs and progression ---
+custom/lua/ixi20_all_jobs_at_start.lua
+custom/lua/ixi20_auto_learn_spells.lua
+custom/lua/ixi20_corsair.lua
+custom/lua/ixi20_share_xp.lua
+custom/cpp/ixi20_share_xp.cpp
+custom/cpp/ixi20_capped_skills.cpp
+custom/cpp/imagine_job_hooks.cpp
+custom/sql/ixi20_all_equipment_all_jobs.sql
+custom/sql/ixi20_af_levels.sql
+custom/sql/ixi20_job_progression_37cap.sql
+custom/sql/ixi20_smn_support_progression.sql
+custom/sql/ixi20_corsair.sql
+custom/sql/ixi20_extra_job_traits.sql
+custom/sql/ixi20_combat_skill_ranks.sql
+custom/sql/ixi20_magic_skill_ranks.sql
+
+# --- Combat ---
+custom/lua/ixi20_disable_trusts.lua
+custom/lua/ixi20_level_sync.lua
+custom/cpp/ixi20_level_sync.cpp
+custom/cpp/ixi20_gear_sync_scaling.cpp
+custom/lua/ixi20_debuff_stack.lua
+custom/cpp/ixi20_debuff_stack.cpp
+custom/lua/ixi20_bind_kite.lua
+custom/cpp/ixi20_bind_kite.cpp
+custom/lua/ixi20_infinite_ammo.lua
+custom/cpp/ixi20_infinite_ammo.cpp
+custom/cpp/ixi20_ninja_tools.cpp
+custom/lua/ixi20_ja_windows.lua
+custom/sql/ixi20_ja_windows.sql
+custom/lua/ixi20_mana_wall.lua
+custom/sql/ixi20_mana_wall.sql
+custom/lua/ixi20_benediction_mp.lua
+custom/lua/ixi20_sp_uptime.lua
+custom/lua/ixi20_long_stances.lua
+custom/lua/ixi20_enhancing_persist.lua
+custom/cpp/ixi20_persist_party.cpp
+custom/lua/ixi20_refresh_regen.lua
+custom/lua/ixi20_refresh_stack.lua
+custom/lua/ixi20_flatten_latents.lua
+custom/sql/ixi20_flatten_latents.sql
+custom/lua/ixi20_haste_belts.lua
+custom/sql/ixi20_haste_belts.sql
+
+# --- Pets ---
+custom/lua/ixi20_hybrid_wyvern.lua
+custom/lua/ixi20_subjob_wyvern.lua
+custom/cpp/ixi20_subjob_wyvern.cpp
+custom/cpp/ixi20_pet_helpful_magic.cpp
+custom/lua/ixi20_no_perpetuation.lua
+custom/cpp/ixi20_no_perpetuation.cpp
+custom/sql/ixi20_no_perpetuation.sql
+custom/lua/ixi20_no_bp_timers.lua
+custom/sql/ixi20_no_bp_timers.sql
+
+# --- Economy and loot ---
+custom/lua/ixi20_gil_economy.lua
+custom/cpp/ixi20_gil_economy.cpp
+custom/lua/ixi20_too_weak_loot.lua
+custom/lua/ixi20_cosmetic_drops.lua
+custom/cpp/ixi20_cosmetic_drops.cpp
+custom/lua/ixi20_dropped_casket.lua
+custom/cpp/dropped_casket.cpp
+custom/sql/ixi20_dropped_caskets.sql
+custom/cpp/ixi20_ah_gifts.cpp
+custom/sql/ixi20_ah_gifts.sql
+custom/lua/ixi20_no_gil_fees.lua
+custom/cpp/ixi20_no_gil_fees.cpp
+custom/lua/ixi20_cp_exchange.lua
+custom/lua/ixi20_max_storage.lua
+custom/cpp/ixi20_craft_always_succeed.cpp
+
+# --- Travel ---
+custom/lua/ixi20_travel_unlocks.lua
+custom/lua/ixi20_all_maps.lua
+custom/lua/ixi20_survival_guides.lua
+custom/lua/ixi20_city_mounts.lua
+custom/cpp/ixi20_city_mounts.cpp
+custom/cpp/ixi20_mount_level.cpp
+custom/lua/ixi20_teleport_no_visit.lua
+custom/lua/ixi20_retrace.lua
+custom/lua/ixi20_permanent_warp.lua
+
+# --- World and HNMs ---
+custom/lua/ixi20_conquest_fame.lua
+custom/lua/ixi20_prowess.lua
+custom/lua/ixi20_regime_support.lua
+custom/lua/ixi20_starter_hnm.lua
+custom/sql/ixi20_starter_hnm.sql
+custom/lua/ixi20_hnm_access.lua
+custom/lua/ixi20_hnm_claim.lua
+custom/lua/ixi20_hnm_difficulty.lua
+custom/lua/ixi20_hnm_packages.lua
+custom/cpp/ixi20_hnm_packages.cpp
+custom/lua/ixi20_nm_restart_spawn.lua
+custom/lua/ixi20_pixie_rescue.lua
+custom/cpp/ixi20_pixie_rescue.cpp
+custom/sql/ixi20_pixie_rescue_mob.sql
+custom/lua/ixi20_whm_bar_enspell.lua
+
+# --- Host / GM only (leave commented unless you want them) ---
+# custom/lua/ixi20_daily_mantra.lua
+# custom/lua/ixi20_leftover_magic_menu.lua
+# custom/lua/ixi20_gm_home_test_mobs.lua
+# custom/lua/ixi20_gm_home_test_hub.lua
+# custom/lua/ixi20_godmode_persist.lua
+# custom/lua/ixi20_nm_spawn.lua
+# custom/lua/ixi20_bis.lua
+# custom/cpp/ixi20_job_change.cpp

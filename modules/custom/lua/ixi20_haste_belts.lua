@@ -1,0 +1,5 @@
+-----------------------------------
+-- Swift Belt and Velocious Belt share Haste+8% / Acc+8 / Store TP+4.
+-- Stats and Velocious Lv.50 live in ixi20_haste_belts.sql.
+-- Not a loaded module (no Lua overrides).
+-----------------------------------

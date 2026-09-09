@@ -1,0 +1,7 @@
+-----------------------------------
+-- Imagine XI 2.0: Call Wyvern on subjob DRG (not a loaded module).
+-- C++ ixi20_subjob_wyvern.cpp:
+--   - Call Wyvern / Dismiss / Spirit Link are usable from /DRG
+--   - LoadPet no longer requires main job DRG when sub is DRG
+-- Hybrid wyvern behavior stays in ixi20_hybrid_wyvern.
+-----------------------------------
