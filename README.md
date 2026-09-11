@@ -25,6 +25,8 @@ IMAGINEXI_TOO_WEAK_NO_LOOT = true
 IMAGINEXI_CONQUEST_FAME = true
 IMAGINEXI_BEASTMEN_CP_IS = true
 IMAGINEXI_ALWAYS_CAP_COMBAT_MAGIC_SKILLS = true
+IMAGINEXI_STORY_OPEN_WORLD = true
+FREE_COP_DYNAMIS = 1
 
 -- settings/map.lua
 IMAGINEXI_HNM_HP_MULTIPLIER = 3.0
@@ -136,6 +138,7 @@ IMAGINEXI_HNM_TIMED_RESPAWN_SECONDS = 1200
 | `ixi20_starter_elementals` | Low-level elementals in the three nation starting fields |
 | `ixi20_mount_dig` | `!dig` on any mount; no Gysahl Greens |
 | `ixi20_cavernous_maws` | All WotG Cavernous Maws usable from create |
+| `ixi20_mission_chronicle` | Missions do not gate the world. Create/login opens Sea / Dynamis / Assault / Salvage / Abyssea / Adoulin / sky. Chronicler NPC or `!chronicle`: play a chapter, skip to the next battle, or close it |
 | `ixi20_chocobo_masque` | Chocobo Masque +1 warps to the home-nation telepoint with no 20h recast |
 
 ## World and HNMs

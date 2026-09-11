@@ -123,6 +123,7 @@ custom/sql/ixi20_starter_elementals.sql
 custom/lua/ixi20_mount_dig.lua
 custom/cpp/ixi20_mount_dig.cpp
 custom/lua/ixi20_cavernous_maws.lua
+custom/lua/ixi20_mission_chronicle.lua
 custom/lua/ixi20_chocobo_masque.lua
 custom/cpp/ixi20_chocobo_masque.cpp
 
