@@ -2,6 +2,7 @@
 -- Daily server mantra for the login /servmes popup.
 -- Same quote for everyone on the calendar day (server local time).
 -- ASCII only so the FFXI client font does not garble attribution.
+-- FileWatcher drops addOverride; assignment wrap stays live.
 -- Do not return this module.
 -----------------------------------
 require('modules/module_utils')
@@ -125,10 +126,35 @@ local function pickDailyMantra()
     return mantras[(dayKey % #mantras) + 1]
 end
 
-m:addOverride('xi.server.getServerMessage', function(language)
-    if language == xi.language.ENGLISH and #mantras > 0 then
+-- Any language: the client may ask for English (2) or French (4).
+-- Returning empty for the second request blanks the welcome body.
+local function serverMessage(language, fallback)
+    if #mantras > 0 then
         return pickDailyMantra()
     end
 
-    return super(language)
+    if fallback then
+        return fallback(language)
+    end
+
+    return ''
+end
+
+m:addOverride('xi.server.getServerMessage', function(language)
+    return serverMessage(language, super)
 end)
+
+-- FileWatcher drops addOverride; assignment wrap stays live.
+if not xi.server._ixi20DailyMantra then
+    xi.server._ixi20DailyMantra = true
+
+    local previous = xi.server.getServerMessage
+    xi.server.getServerMessage = function(language)
+        return serverMessage(language, previous)
+    end
+end
+
+-- Stock getServerMessage reads this when the override is not applied.
+if xi.settings and xi.settings.main then
+    xi.settings.main.SERVER_MESSAGE = pickDailyMantra()
+end

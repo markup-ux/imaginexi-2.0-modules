@@ -55,6 +55,9 @@ local function formatRemain(seconds)
     return string.format('%um', math.max(1, mins))
 end
 
+xi.ixi20HnmAccess.remainingLock = remainingLock
+xi.ixi20HnmAccess.formatRemain  = formatRemain
+
 xi.ixi20HnmAccess.isLocked = function(player, mob)
     if not player or not player.isPC or not player:isPC() or not mob then
         return false

@@ -1,7 +1,8 @@
 -----------------------------------
 -- Imagine XI 1.0 JA windows (module only)
 -- Cascade: 8 min +10 MATT (10% MAB), does not consume on the next nuke
--- Accession / Manifestation / Diffusion: 45s multi-spell windows
+-- Accession / Manifestation: 45s multi-spell windows
+-- Diffusion is always-on in ixi20_blu_affinity (main and sub BLU)
 -- Do not return this module.
 -----------------------------------
 require('modules/module_utils')
@@ -14,7 +15,6 @@ local WINDOW_SECONDS =
     [xi.effect.CASCADE]       = 480,
     [xi.effect.ACCESSION]     = 45,
     [xi.effect.MANIFESTATION] = 45,
-    [xi.effect.DIFFUSION]     = 45,
 }
 
 local JOB_FOR_EFFECT =
@@ -22,7 +22,6 @@ local JOB_FOR_EFFECT =
     [xi.effect.CASCADE]       = xi.job.BLM,
     [xi.effect.ACCESSION]     = xi.job.SCH,
     [xi.effect.MANIFESTATION] = xi.job.SCH,
-    [xi.effect.DIFFUSION]     = xi.job.BLU,
 }
 
 local windows     = {}
@@ -168,10 +167,6 @@ m:addOverride('xi.actions.abilities.manifestation.onUseAbility', function(player
     return applyTimedWindow(player, xi.effect.MANIFESTATION)
 end)
 
-m:addOverride('xi.job_utils.blue_mage.useDiffusion', function(player, target, ability, action)
-    return applyTimedWindow(player, xi.effect.DIFFUSION)
-end)
-
 m:addOverride('xi.spells.blue.calculateDurationWithDiffusion', function(caster, duration)
     if caster:hasStatusEffect(xi.effect.DIFFUSION) then
         local merits = caster:getMerit(xi.merit.DIFFUSION)
@@ -223,7 +218,6 @@ m:addOverride('xi.player.onGameIn', function(player, firstLogin, zoning)
         clearWindow(player, xi.effect.CASCADE)
         clearWindow(player, xi.effect.ACCESSION)
         clearWindow(player, xi.effect.MANIFESTATION)
-        clearWindow(player, xi.effect.DIFFUSION)
         setCascadeMatt(player, false)
     end
 

@@ -2,7 +2,7 @@
 -- Imagine XI 2.0: WHM main Bar-element also grants that element's En-spell.
 -- Barfire / Barfira -> Enfire, and the same for the other five elements.
 -- Applies to every player the Bar spell actually hits (self, -ra, Accession).
--- Duration follows the Bar. Chat confirms the En-spell.
+-- Duration follows the Bar. Self-cast En-spell survives zoning with the Bar.
 -- FileWatcher drops addOverride; assignment wrap stays live.
 -- Do not return this module.
 -----------------------------------
@@ -11,7 +11,16 @@ require('modules/module_utils')
 
 local m = Module:new('ixi20_whm_bar_enspell')
 
-local PERSIST_FLAGS = bit.bor(xi.effectFlag.ON_ZONE, xi.effectFlag.ON_JOBCHANGE, xi.effectFlag.HIDE_TIMER)
+local PERSIST_FLAGS_COMMON = bit.bor(xi.effectFlag.ON_JOBCHANGE, xi.effectFlag.HIDE_TIMER)
+local PERSIST_FLAGS_PARTY  = bit.bor(PERSIST_FLAGS_COMMON, xi.effectFlag.ON_ZONE)
+
+local function persistFlags(caster, target)
+    if caster:getID() == target:getID() then
+        return PERSIST_FLAGS_COMMON
+    end
+
+    return PERSIST_FLAGS_PARTY
+end
 
 local BAR_TO_ENSPELL =
 {
@@ -84,12 +93,13 @@ local function grantBarEnspell(caster, target, spell, barEffectId)
         target:delStatusEffectSilent(effectId)
     end
 
+    local flags = persistFlags(caster, target)
     target:addStatusEffect(mapping.effect, {
         power    = finalPower,
         duration = duration,
         origin   = caster,
         silent   = true,
-        flag     = PERSIST_FLAGS,
+        flag     = flags,
     })
 
     local enEffect = target:getStatusEffect(mapping.effect)
@@ -97,7 +107,10 @@ local function grantBarEnspell(caster, target, spell, barEffectId)
         return
     end
 
-    enEffect:addEffectFlag(PERSIST_FLAGS)
+    enEffect:addEffectFlag(flags)
+    if caster:getID() == target:getID() then
+        enEffect:delEffectFlag(xi.effectFlag.ON_ZONE)
+    end
     target:messageBasic(xi.msg.basic.GAINS_EFFECT_OF_STATUS, mapping.effect)
 end
 

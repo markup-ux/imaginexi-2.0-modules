@@ -7,16 +7,40 @@ custom/lua/ixi20_auto_learn_spells.lua
 custom/lua/ixi20_corsair.lua
 custom/lua/ixi20_share_xp.lua
 custom/cpp/ixi20_share_xp.cpp
+custom/lua/ixi20_combine_kill_xp.lua
+custom/cpp/ixi20_combine_kill_xp.cpp
+custom/lua/ixi20_level_tp.lua
+custom/lua/ixi20_signet.lua
+custom/lua/ixi20_dedication.lua
 custom/cpp/ixi20_capped_skills.cpp
 custom/cpp/imagine_job_hooks.cpp
 custom/sql/ixi20_all_equipment_all_jobs.sql
 custom/sql/ixi20_af_levels.sql
+custom/lua/ixi20_af1_weapons.lua
+custom/sql/ixi20_af1_weapons.sql
 custom/sql/ixi20_job_progression_37cap.sql
 custom/sql/ixi20_smn_support_progression.sql
 custom/sql/ixi20_corsair.sql
 custom/sql/ixi20_extra_job_traits.sql
 custom/sql/ixi20_combat_skill_ranks.sql
 custom/sql/ixi20_magic_skill_ranks.sql
+
+# --- Job kits ---
+custom/lua/ixi20_blu_affinity.lua
+custom/sql/ixi20_blu_affinity.sql
+custom/lua/ixi20_blu_damage.lua
+custom/lua/ixi20_sch_charges.lua
+custom/sql/ixi20_sch_charges.sql
+custom/cpp/ixi20_sch_charges.cpp
+custom/cpp/ixi20_sch_arts.cpp
+custom/lua/ixi20_sch_both_schools.lua
+custom/cpp/ixi20_sch_both_schools.cpp
+custom/lua/ixi20_sch_arts_skill.lua
+custom/lua/ixi20_sch_stratagem_refund.lua
+custom/cpp/ixi20_sch_stratagem_refund.cpp
+custom/lua/ixi20_thf.lua
+custom/cpp/ixi20_thf.cpp
+custom/lua/ixi20_dnc.lua
 
 # --- Combat ---
 custom/lua/ixi20_disable_trusts.lua
@@ -41,15 +65,21 @@ custom/lua/ixi20_enhancing_persist.lua
 custom/cpp/ixi20_persist_party.cpp
 custom/lua/ixi20_refresh_regen.lua
 custom/lua/ixi20_refresh_stack.lua
+custom/lua/ixi20_sublimation_stack.lua
 custom/lua/ixi20_flatten_latents.lua
 custom/sql/ixi20_flatten_latents.sql
 custom/lua/ixi20_haste_belts.lua
 custom/sql/ixi20_haste_belts.sql
+custom/lua/ixi20_player_hit.lua
+custom/lua/ixi20_weakness.lua
+custom/cpp/ixi20_instant_reengage.cpp
+custom/cpp/ixi20_disable_anon.cpp
 
 # --- Pets ---
 custom/lua/ixi20_hybrid_wyvern.lua
 custom/lua/ixi20_subjob_wyvern.lua
 custom/cpp/ixi20_subjob_wyvern.cpp
+custom/lua/ixi20_pet_helpful_magic.lua
 custom/cpp/ixi20_pet_helpful_magic.cpp
 custom/lua/ixi20_no_perpetuation.lua
 custom/cpp/ixi20_no_perpetuation.cpp
@@ -72,6 +102,8 @@ custom/lua/ixi20_no_gil_fees.lua
 custom/cpp/ixi20_no_gil_fees.cpp
 custom/lua/ixi20_cp_exchange.lua
 custom/lua/ixi20_max_storage.lua
+custom/lua/ixi20_mob_drop_sell.lua
+custom/cpp/ixi20_mob_drop_sell.cpp
 custom/cpp/ixi20_craft_always_succeed.cpp
 
 # --- Travel ---
@@ -84,14 +116,33 @@ custom/cpp/ixi20_mount_level.cpp
 custom/lua/ixi20_teleport_no_visit.lua
 custom/lua/ixi20_retrace.lua
 custom/lua/ixi20_permanent_warp.lua
+custom/lua/ixi20_homepoint_heal.lua
+custom/lua/ixi20_safe_outposts.lua
+custom/lua/ixi20_starter_elementals.lua
+custom/sql/ixi20_starter_elementals.sql
+custom/lua/ixi20_mount_dig.lua
+custom/cpp/ixi20_mount_dig.cpp
+custom/lua/ixi20_cavernous_maws.lua
+custom/lua/ixi20_chocobo_masque.lua
+custom/cpp/ixi20_chocobo_masque.cpp
 
 # --- World and HNMs ---
 custom/lua/ixi20_conquest_fame.lua
+custom/lua/ixi20_beastmen_cp_is.lua
+custom/lua/ixi20_nation_liveries.lua
 custom/lua/ixi20_prowess.lua
 custom/lua/ixi20_regime_support.lua
+custom/lua/ixi20_regime_auto.lua
+custom/lua/ixi20_imagine_linkshell.lua
+custom/cpp/ixi20_imagine_linkshell.cpp
+custom/lua/ixi20_roe.lua
+custom/cpp/ixi20_roe.cpp
+custom/lua/ixi20_death_repop.lua
+custom/cpp/ixi20_death_repop.cpp
 custom/lua/ixi20_starter_hnm.lua
 custom/sql/ixi20_starter_hnm.sql
 custom/lua/ixi20_hnm_access.lua
+custom/lua/ixi20_dragons_aery_pop.lua
 custom/lua/ixi20_hnm_claim.lua
 custom/lua/ixi20_hnm_difficulty.lua
 custom/lua/ixi20_hnm_packages.lua
@@ -105,6 +156,7 @@ custom/lua/ixi20_whm_bar_enspell.lua
 # --- Host / GM only (leave commented unless you want them) ---
 # custom/lua/ixi20_daily_mantra.lua
 # custom/lua/ixi20_leftover_magic_menu.lua
+# custom/lua/ixi20_overlay_hair.lua
 # custom/lua/ixi20_gm_home_test_mobs.lua
 # custom/lua/ixi20_gm_home_test_hub.lua
 # custom/lua/ixi20_godmode_persist.lua

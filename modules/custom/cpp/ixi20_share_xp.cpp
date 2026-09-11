@@ -3,6 +3,7 @@
  *
  * Always on. Half of script/combat/gil XP is applied to the current subjob,
  * capped at job level 37 (a 75 main cannot powerlevel the sub past 37).
+ * Per-kill subjob XP chat is omitted so FoV regime progress (2/3) is not overwritten.
  ************************************************************************/
 
 #include "map/utils/moduleutils.h"
@@ -131,8 +132,6 @@ void addExpToJob(CCharEntity* PChar, xi::Job job, uint32 exp)
             }
         }
     }
-
-    systemMessage(PChar, fmt::format("Your {} subjob gains {} experience points.", jobName(job), exp));
 
     if (leveled)
     {

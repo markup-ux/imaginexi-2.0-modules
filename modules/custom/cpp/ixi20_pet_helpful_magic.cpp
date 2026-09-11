@@ -8,6 +8,9 @@
  *
  * Pets are not PCs. Strip TARGET_PLAYER and use CMobEntity rules so
  * TARGET_NPC (allied pet) still works. Core src is not modified.
+ *
+ * Pair with ixi20_pet_helpful_magic.lua: targeting is not enough.
+ * Cure still no-ops unless isValidHealTarget includes PET.
  ************************************************************************/
 
 #include "map/utils/moduleutils.h"

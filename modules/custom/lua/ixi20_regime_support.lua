@@ -1,7 +1,9 @@
 -----------------------------------
 -- Imagine XI 2.0: Field Manual / Grounds Tome support costs 0 tabs.
+-- Native FoV/GoV kill/review messages are used. This file only keeps
+-- page-complete from getting stuck when repeat reset is skipped.
 -- FileWatcher does not replace module overrides. Restart xi_map after
--- changing this file. Do not return this module.
+-- changing addOverride handlers. Do not return this module.
 -----------------------------------
 require('modules/module_utils')
 -----------------------------------
@@ -134,3 +136,67 @@ m:addOverride('xi.regime.bookOnEventFinish', function(player, option, regimeType
         fn = env and env.super
     end
 end)
+
+local function pageIsFilled(player, needed)
+    local any = false
+    for i = 1, 4 do
+        local want = needed[i] or 0
+        if want > 0 then
+            any = true
+            if player:getCharVar('[regime]killed' .. i) < want then
+                return false
+            end
+        end
+    end
+
+    return any
+end
+
+-- If page-complete Lua errors before the repeat reset, kills stay at cap and
+-- further checkRegime calls return immediately (no chat, no credit).
+local function recoverStuckRepeat(player, regimeId)
+    if
+        not player or
+        player:getCharVar('[regime]id') ~= regimeId or
+        player:getCharVar('[regime]repeat') ~= 1
+    then
+        return false
+    end
+
+    local needed = {}
+    for i = 1, 4 do
+        needed[i] = player:getCharVar('[regime]needed' .. i)
+    end
+
+    if not pageIsFilled(player, needed) then
+        return false
+    end
+
+    for i = 1, 4 do
+        player:setCharVar('[regime]killed' .. i, 0)
+    end
+
+    return true
+end
+
+-- Drop any leftover FileWatcher progress-chat wraps.
+if xi.regime._ixi20ReviewInner then
+    xi.regime.bookOnEventUpdate = xi.regime._ixi20ReviewInner
+    xi.regime._ixi20ReviewInner = nil
+end
+
+if not xi.regime._ixi20CheckInner then
+    xi.regime._ixi20CheckInner = xi.regime.checkRegime
+end
+
+xi.regime.checkRegime = function(player, mob, regimeId, index, regimeType)
+    if not player or not player.getCharVar then
+        return xi.regime._ixi20CheckInner(player, mob, regimeId, index, regimeType)
+    end
+
+    pcall(xi.regime._ixi20CheckInner, player, mob, regimeId, index, regimeType)
+
+    if recoverStuckRepeat(player, regimeId) then
+        pcall(xi.regime._ixi20CheckInner, player, mob, regimeId, index, regimeType)
+    end
+end

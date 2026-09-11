@@ -22,6 +22,21 @@ WHERE `groupid` IN (36, 37)
   AND `zoneid` IN (100, 101, 106, 107, 115, 116)
   AND `name` IN ('StarterHNM', 'StarterHNM_Add');
 
+DELETE FROM `mob_groups`
+WHERE `groupid` BETWEEN 38 AND 45
+  AND `zoneid` IN (100, 106, 116)
+  AND `name` LIKE 'Starter_%';
+
+DELETE FROM `mob_pools`
+WHERE (`poolid` = 71 AND `name` = 'Air_Elemental')
+   OR (`poolid` = 913 AND `name` = 'Dark_Elemental')
+   OR (`poolid` = 1160 AND `name` = 'Earth_Elemental')
+   OR (`poolid` = 1341 AND `name` = 'Fire_Elemental')
+   OR (`poolid` = 2043 AND `name` = 'Ice_Elemental')
+   OR (`poolid` = 2413 AND `name` = 'Light_Elemental')
+   OR (`poolid` = 3912 AND `name` = 'Thunder_Elemental')
+   OR (`poolid` = 4309 AND `name` = 'Water_Elemental');
+
 DELETE FROM `mob_pools`
 WHERE `poolid` = 3148 AND `name` = 'Pixie';
 
@@ -89,9 +104,60 @@ DROP TABLE IF EXISTS `ixi20_abilities_level_backup`;
 DROP TABLE IF EXISTS `ixi20_traits_backup`;
 DROP TABLE IF EXISTS `ixi20_spell_jobs_backup`;
 DROP TABLE IF EXISTS `ixi20_abilities_charges_backup`;
+DROP TABLE IF EXISTS `ixi20_sch_ability_level_backup`;
 DROP TABLE IF EXISTS `ixi20_cascade_recast_backup`;
 DROP TABLE IF EXISTS `ixi20_mana_wall_recast_backup`;
 DROP TABLE IF EXISTS `ixi20_skill_ranks_backup`;
+
+-- AF1 weapons (ixi20_af1_weapons.sql). Run before no_perpetuation revert so
+-- Dragon Staff Summoning+10 is cleared, then perp-1 can be restored.
+CREATE TABLE IF NOT EXISTS `ixi20_af1_weapons_mods_backup` (
+  `itemId` smallint(5) unsigned NOT NULL,
+  `modId` smallint(5) unsigned NOT NULL,
+  `value` smallint(5) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`itemId`, `modId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `ixi20_af1_weapons_pet_mods_backup` (
+  `itemId` smallint(5) unsigned NOT NULL,
+  `modId` smallint(5) unsigned NOT NULL,
+  `value` smallint(5) NOT NULL DEFAULT 0,
+  `petType` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`itemId`, `modId`, `petType`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `ixi20_af1_weapons_level_backup` (
+  `itemId` smallint(5) unsigned NOT NULL,
+  `level`  tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY (`itemId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `ixi20_af1_weapons_dmg_backup` (
+  `itemId` smallint(5) unsigned NOT NULL,
+  `dmg`    int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`itemId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DELETE FROM `item_mods` WHERE `itemId` IN (
+    16678, 17478, 17422, 17532, 16829, 16764, 17643, 16798, 16680, 16766,
+    17188, 17812, 17771, 17772, 16887, 17597, 17717, 18702, 17858, 19203
+);
+INSERT IGNORE INTO `item_mods` (`itemId`, `modId`, `value`)
+SELECT `itemId`, `modId`, `value` FROM `ixi20_af1_weapons_mods_backup`;
+
+DELETE FROM `item_mods_pet` WHERE `itemId` IN (16680, 16887, 17597, 17858);
+INSERT IGNORE INTO `item_mods_pet` (`itemId`, `modId`, `value`, `petType`)
+SELECT `itemId`, `modId`, `value`, `petType` FROM `ixi20_af1_weapons_pet_mods_backup`;
+
+UPDATE `item_equipment` e
+INNER JOIN `ixi20_af1_weapons_level_backup` b ON b.`itemId` = e.`itemId`
+SET e.`level` = b.`level`;
+
+UPDATE `item_weapon` w
+INNER JOIN `ixi20_af1_weapons_dmg_backup` b ON b.`itemId` = w.`itemId`
+SET w.`dmg` = b.`dmg`;
+
+DROP TABLE IF EXISTS `ixi20_af1_weapons_mods_backup`;
+DROP TABLE IF EXISTS `ixi20_af1_weapons_pet_mods_backup`;
+DROP TABLE IF EXISTS `ixi20_af1_weapons_level_backup`;
+DROP TABLE IF EXISTS `ixi20_af1_weapons_dmg_backup`;
 
 -- Perpetuation gear remaps (ixi20_no_perpetuation.sql)
 CREATE TABLE IF NOT EXISTS `ixi20_perp_item_mods_backup` (

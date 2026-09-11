@@ -1,0 +1,6 @@
+-----------------------------------
+-- AF1 weapons stay Lv.40 with keep-worthy stats.
+-- Stats, DMG, and wear level live in ixi20_af1_weapons.sql.
+-- Native Examine text is 108.DAT (ixi20_patch_af1_weapon_dats.py).
+-- Not a loaded module (no Lua overrides).
+-----------------------------------

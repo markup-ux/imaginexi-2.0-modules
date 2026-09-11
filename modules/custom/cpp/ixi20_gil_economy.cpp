@@ -2,9 +2,11 @@
  * Imagine XI 2.0 loot-progression economy (module only)
  *
  * - player:addGil / spark currency -> XP
- * - Vendor sell (0x085) of combat gear and crystals -> XP (shop goods / fishing tools pay 0)
+ * - Vendor sell (0x085) of combat gear, crystals, and (with ixi20_mob_drop_sell)
+ *   other NPC-sellable items -> XP (fishing tools pay 0)
  * - Shop buy (0x083) blocks weapons / armor (not fishing tools)
  * - addShopItem prices are 0 while gil converts to XP
+ * - 0x03D shop-sell Count/Type patched here (LSB leaves Count 0, no sale-done)
  ************************************************************************/
 
 #include "map/utils/moduleutils.h"
@@ -16,6 +18,7 @@
 #include "map/enums/chat_message_type.h"
 #include "map/enums/msg_std.h"
 #include "map/enums/packet_c2s.h"
+#include "map/enums/packet_s2c.h"
 #include "map/item_container.h"
 #include "map/items/item_weapon.h"
 #include "map/items/transactions/item_claim.h"
@@ -27,6 +30,7 @@
 #include "map/packets/s2c/0x009_message.h"
 #include "map/packets/s2c/0x017_chat_std.h"
 #include "map/packets/s2c/0x01d_item_same.h"
+#include "map/packets/s2c/0x03d_shop_sell.h"
 #include "map/trade_container.h"
 #include "map/utils/charutils.h"
 #include "map/utils/itemutils.h"
@@ -35,10 +39,29 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
+#include <memory>
 #include <string>
 
 namespace
 {
+
+// 0x03D payload after GP_SERV_HEADER (4). LSB leaves Count=0 and never sends Type=1.
+constexpr std::size_t kShopSellTypeOffset  = 9;
+constexpr std::size_t kShopSellCountOffset = 12;
+
+void fillShopSellPacket(CBasicPacket& packet, uint32 count, uint8 type)
+{
+    packet.ref<uint8>(kShopSellTypeOffset)   = type;
+    packet.ref<uint32>(kShopSellCountOffset) = count;
+}
+
+void pushShopSellDone(CCharEntity* PChar, uint8 slotId, uint32 unitPrice, uint32 quantity)
+{
+    auto packet = std::make_unique<GP_SERV_COMMAND_SHOP_SELL>(slotId, unitPrice);
+    fillShopSellPacket(*packet, quantity, 1);
+    PChar->pushPacket(std::move(packet));
+}
 
 auto gilToExpEnabled() -> bool
 {
@@ -127,6 +150,15 @@ auto isElementalCrystal(uint16 itemId) -> bool
 
 auto grantsVendorSellExp(uint16 itemId) -> bool
 {
+    if (auto fn = lua["Ixi20GrantsVendorSellExp"]; fn.valid())
+    {
+        auto result = fn(itemId);
+        if (result.valid())
+        {
+            return result.get<bool>();
+        }
+    }
+
     return isShopGear(itemId) || isElementalCrystal(itemId);
 }
 
@@ -210,6 +242,7 @@ auto handleShopSell(MapSession* session, CCharEntity* PChar, CBasicPacket& packe
     ShowInfoFmt("Ixi20GilEconomy: Player '{}' sold {} of itemID {} for {} XP [to VENDOR]", PChar->getName(), quantity, itemId, cost);
     PChar->pushPacket<GP_SERV_COMMAND_MESSAGE>(nullptr, itemId, quantity, MsgStd::Sell);
     PChar->pushPacket<GP_SERV_COMMAND_ITEM_SAME>(PChar);
+    pushShopSellDone(PChar, slotId, unitPrice, quantity);
     PChar->Container->setItem(PChar->Container->getExSize(), 0, -1, 0);
     return true;
 }
@@ -234,10 +267,18 @@ public:
                 entity.addGil(gil);
             };
 
-            lua["CBaseEntity"]["addCurrency"] = [](CLuaBaseEntity entity, const std::string& currencyType, int32 amount, sol::object maxObj) {
+            // Do not call entity.addCurrency with sol::lua_nil. value_or(sol::lua_nil)
+            // builds a sol::object with no lua_State; get_type() then AV in lua_checkstack
+            // on 2-arg Lua calls (regime tabs, npcUtil, many RoE paths).
+            lua["CBaseEntity"]["addCurrency"] = [](CLuaBaseEntity entity, const std::string& currencyType, int32 amount, sol::optional<int32> maxAmount) {
                 auto* PChar = dynamic_cast<CCharEntity*>(entity.GetBaseEntity());
+                if (PChar == nullptr)
+                {
+                    ShowWarning("Ixi20GilEconomy: addCurrency called on non-PC");
+                    return;
+                }
+
                 if (
-                    PChar &&
                     amount > 0 &&
                     sparksToExpEnabled() &&
                     currencyType == "spark_of_eminence")
@@ -246,7 +287,8 @@ public:
                     return;
                 }
 
-                entity.addCurrency(currencyType, amount, maxObj);
+                const int32 maxPoints = maxAmount.value_or(std::numeric_limits<int32>::max());
+                charutils::AddPoints(PChar, currencyType.c_str(), amount, maxPoints);
             };
 
             lua["CBaseEntity"]["addShopItem"] = [](CLuaBaseEntity entity, uint16 itemID, double rawPrice, sol::variadic_args va) {
@@ -283,6 +325,32 @@ public:
         }
 
         ShowInfo("Imagine XI 2.0: gil economy module loaded");
+    }
+
+    void OnPushPacket(CCharEntity* PChar, const std::unique_ptr<CBasicPacket>& packet) override
+    {
+        if (PChar == nullptr || packet == nullptr || PChar->Container == nullptr)
+        {
+            return;
+        }
+
+        if (packet->getType() != static_cast<uint16>(PacketS2C::GP_SERV_COMMAND_SHOP_SELL))
+        {
+            return;
+        }
+
+        // Stock appraisal is Type 0 with Count 0. Write the pending sell qty so the
+        // shop window keeps showing an amount after a string of sales.
+        if (packet->ref<uint8>(kShopSellTypeOffset) != 0)
+        {
+            return;
+        }
+
+        const uint32 quantity = PChar->Container->getQuantity(PChar->Container->getExSize());
+        if (quantity > 0)
+        {
+            packet->ref<uint32>(kShopSellCountOffset) = quantity;
+        }
     }
 
     auto OnIncomingPacket(MapSession* session, CCharEntity* PChar, CBasicPacket& packet) -> bool override

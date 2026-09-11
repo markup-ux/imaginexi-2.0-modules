@@ -1,11 +1,11 @@
 -----------------------------------
 -- Imagine XI 2.0: Enhancing magic, BRD songs, and COR rolls last until
--- zone / death / job change, but only if you cast them on yourself or
--- someone in your party. Party-cast persist buffs drop if the caster
--- leaves that party or job-changes. Blink, Embrava, and Foil stay timed.
--- Utsusemi is ninjutsu and is not touched. Enfeebling songs stay timed.
--- Bust and Double-Up stay timed. Recast overwrites. Players only.
--- Power is unchanged. Recast still upgrades tier / stacked Refresh.
+-- death / job change if you cast them on yourself (they survive zoning).
+-- Party-cast persist buffs last until zone / death / job change, and drop
+-- if the caster leaves that party or job-changes. Blink, Embrava, and Foil
+-- stay timed. Utsusemi is ninjutsu and is not touched. Enfeebling songs
+-- stay timed. Bust and Double-Up stay timed. Recast overwrites. Players
+-- only. Power is unchanged. Recast still upgrades tier / stacked Refresh.
 -- Do not return this module.
 -----------------------------------
 require('modules/module_utils')
@@ -14,8 +14,9 @@ require('scripts/globals/player')
 
 local m = Module:new('ixi20_enhancing_persist')
 
-local PERSIST_SECONDS = 604800 -- 7 days; ON_ZONE is the real end
-local PERSIST_FLAGS   = bit.bor(xi.effectFlag.ON_ZONE, xi.effectFlag.ON_JOBCHANGE, xi.effectFlag.HIDE_TIMER)
+local PERSIST_SECONDS      = 604800 -- 7 days; self lasts across zones, party ends on zone
+local PERSIST_FLAGS_COMMON = bit.bor(xi.effectFlag.ON_JOBCHANGE, xi.effectFlag.HIDE_TIMER)
+local PERSIST_FLAGS_PARTY  = bit.bor(PERSIST_FLAGS_COMMON, xi.effectFlag.ON_ZONE)
 local LISTENER_AUDIT  = 'IXI20_PERSIST_AUDIT'
 local LISTENER_JOB    = 'IXI20_PERSIST_JOB'
 local LISTENER_TICK   = 'IXI20_PERSIST_TICK'
@@ -78,6 +79,20 @@ local function shouldPersist(caster, target, spellId, spellEffect)
     return caster:getID() == target:getID() or sameParty(caster, target)
 end
 
+local function isSelfCast(caster, target)
+    return isPlayer(caster) and isPlayer(target) and caster:getID() == target:getID()
+end
+
+local function applyPersistFlags(effect, caster, target)
+    if isSelfCast(caster, target) then
+        effect:addEffectFlag(PERSIST_FLAGS_COMMON)
+        effect:delEffectFlag(xi.effectFlag.ON_ZONE)
+        return
+    end
+
+    effect:addEffectFlag(PERSIST_FLAGS_PARTY)
+end
+
 local function persistCasterId(effect)
     if not effect then
         return 0
@@ -127,7 +142,8 @@ local function isPersistBuff(effect)
         return true
     end
 
-    return effect:hasEffectFlag(xi.effectFlag.HIDE_TIMER) and effect:hasEffectFlag(xi.effectFlag.ON_ZONE)
+    return effect:hasEffectFlag(xi.effectFlag.HIDE_TIMER) and
+        (effect:hasEffectFlag(xi.effectFlag.ON_ZONE) or effect:hasEffectFlag(xi.effectFlag.ON_JOBCHANGE))
 end
 
 local function partyIdSet(player)
@@ -181,12 +197,15 @@ local function auditPersist(player)
     local inParty = partyIdSet(player)
     local drop    = {}
 
+    -- Songs / rolls / En-spells get ON_ZONE back from YAML on load. Strip it
+    -- from self-cast persist kit so the next zone line keeps them.
     for _, effect in pairs(player:getStatusEffects()) do
         if isPersistBuff(effect) then
             local casterId = persistCasterId(effect)
-            if
+            if casterId == selfId then
+                effect:delEffectFlag(xi.effectFlag.ON_ZONE)
+            elseif
                 casterId ~= 0 and
-                casterId ~= selfId and
                 not casterStillValid(player, effect, casterId, inParty)
             then
                 drop[#drop + 1] = effect:getEffectType()
@@ -236,7 +255,7 @@ local function stampPersist(caster, target, spellId, spellEffect)
         return
     end
 
-    effect:addEffectFlag(PERSIST_FLAGS)
+    applyPersistFlags(effect, caster, target)
     effect:setOriginID(caster:getID())
     if effect:getSourceType() == 0 then
         effect:setSource(0, caster:getMainJob())
@@ -254,7 +273,7 @@ local function persistReraise(caster, target)
     end
 
     effect:setDuration(PERSIST_SECONDS * 1000)
-    effect:addEffectFlag(PERSIST_FLAGS)
+    applyPersistFlags(effect, caster, target)
     effect:setOriginID(caster:getID())
     if effect:getSourceType() == 0 then
         effect:setSource(0, caster:getMainJob())
@@ -334,9 +353,12 @@ local function stampSong(caster, target)
     local casterId = caster and caster.getID and caster:getID()
     for _, effect in pairs(target:getStatusEffects()) do
         if effect:hasEffectFlag(xi.effectFlag.SONG) then
-            effect:addEffectFlag(PERSIST_FLAGS)
-            if casterId then
-                effect:setOriginID(casterId)
+            local songCaster = persistCasterId(effect)
+            if not casterId or songCaster == 0 or songCaster == casterId then
+                applyPersistFlags(effect, caster, target)
+                if casterId then
+                    effect:setOriginID(casterId)
+                end
             end
         end
     end
@@ -354,7 +376,7 @@ local function stampRoll(caster, target)
             (not casterId or effect:getSourceTypeParam() == casterId)
         then
             effect:setDuration(PERSIST_SECONDS * 1000)
-            effect:addEffectFlag(bit.bor(xi.effectFlag.HIDE_TIMER, xi.effectFlag.ON_JOBCHANGE))
+            applyPersistFlags(effect, caster, target)
             effect:delEffectFlag(xi.effectFlag.LOGOUT)
             if casterId then
                 effect:setOriginID(casterId)

@@ -3,6 +3,7 @@
 -- Command-only module (no overrides). Uses ixi20_bis_gear_progression lists.
 -----------------------------------
 require('modules/module_utils')
+package.loaded['modules/custom/lua/ixi20_bis_gear_progression'] = nil
 require('modules/custom/lua/ixi20_bis_gear_progression')
 -----------------------------------
 
@@ -142,6 +143,49 @@ local function resolveTarget(player, name)
     return targ
 end
 
+-- Inventory and wardrobes can be equipped from. Rare gear already in
+-- these containers must be reused; addItem rejects a second copy.
+local EQUIP_CONTAINERS =
+{
+    xi.inv.INVENTORY,
+    xi.inv.WARDROBE,
+    xi.inv.WARDROBE2,
+    xi.inv.WARDROBE3,
+    xi.inv.WARDROBE4,
+    xi.inv.WARDROBE5,
+    xi.inv.WARDROBE6,
+    xi.inv.WARDROBE7,
+    xi.inv.WARDROBE8,
+}
+
+local function hasOwned(player, itemId)
+    return player:hasItem(itemId) == true
+end
+
+local function findEquipContainer(player, itemId)
+    for _, container in ipairs(EQUIP_CONTAINERS) do
+        if player:hasItem(itemId, container) then
+            return container
+        end
+    end
+
+    return nil
+end
+
+local function equipOwned(player, itemId, slot)
+    if player:getEquipID(slot) == itemId then
+        return true
+    end
+
+    local container = findEquipContainer(player, itemId)
+    if not container then
+        return false
+    end
+
+    player:equipItem(itemId, container, slot)
+    return player:getEquipID(slot) == itemId
+end
+
 local function printSet(player, targ, set, granted)
     local job   = targ:getMainJob()
     local level = targ:getMainLvl()
@@ -172,27 +216,40 @@ local function grantSet(player, targ, set)
         return
     end
 
-    if targ:getFreeSlotsCount() < #set then
+    local toAdd    = {}
+    local seenAdd  = {}
+    local addCount = 0
+    for _, entry in ipairs(set) do
+        if not seenAdd[entry.itemId] then
+            seenAdd[entry.itemId] = true
+            if not hasOwned(targ, entry.itemId) then
+                addCount = addCount + 1
+                table.insert(toAdd, entry.itemId)
+            end
+        end
+    end
+
+    if targ:getFreeSlotsCount() < addCount then
         player:printToPlayer(string.format(
             '[bis] Need %u free inventory slots (%s has %u).',
-            #set,
+            addCount,
             targ:getName(),
             targ:getFreeSlotsCount()
         ), xi.msg.channel.SYSTEM_3)
         return
     end
 
-    local equippedId = {}
-    for _, entry in ipairs(set) do
-        if not targ:addItem({ id = entry.itemId, silent = true }) then
-            player:printToPlayer(string.format('[bis] Failed to add %s.', itemLabel(entry.itemId)), xi.msg.channel.SYSTEM_3)
+    for _, itemId in ipairs(toAdd) do
+        if not targ:addItem({ id = itemId, silent = true }) then
+            player:printToPlayer(string.format('[bis] Failed to add %s.', itemLabel(itemId)), xi.msg.channel.SYSTEM_3)
             return
         end
     end
 
+    local equippedId = {}
     for _, entry in ipairs(set) do
         if not equippedId[entry.itemId] then
-            targ:equipItem(entry.itemId, xi.inv.INVENTORY, entry.slot)
+            equipOwned(targ, entry.itemId, entry.slot)
             equippedId[entry.itemId] = true
         end
     end
@@ -265,5 +322,7 @@ xi.module.registerCommand('bis', commandObj)
 
 -- FileWatcher re-runs module files but discards commandRegistry, so also
 -- publish here so !bis is live without a map restart.
+-- Progression lists are uncached above so per-job weapon and AF edits apply on reload.
+-- DNC 36–50 uses AF1 in every armor slot plus Marauder's Knife / War Hoop (not Mandau).
 xi.commands = xi.commands or {}
 xi.commands.bis = commandObj

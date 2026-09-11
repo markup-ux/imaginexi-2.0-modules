@@ -1,5 +1,5 @@
 -----------------------------------
--- Imagine XI 2.0 multi-currency exchange (beside conquest / signet guards)
+-- Imagine XI 2.0 multi-currency exchange (on conquest / signet guards)
 -- Port of 1.0 cp_exchange_signet_buddy.lua.
 --
 -- Plays with ixi20_gil_economy:
@@ -8,7 +8,7 @@
 --   Sparks are spend-only. Get XP pays at the spark scale (5 CP = 1 XP at ratio 1.0)
 --   via ixi20_economy.grantExperience. Refunds use setGil / setCurrency.
 --
--- Spawns "Exchange" the first time a player uses a conquest overseer.
+-- Talking to a conquest overseer opens Conquest (signet / nation) or Exchange.
 -- customMenu is deferred so HandleCustomMenu is not re-entered.
 -----------------------------------
 require('modules/module_utils')
@@ -52,7 +52,6 @@ local ASSETS =
 }
 
 local currentNpc = nil
-local spawnedForGuard = {}
 
 local function gilToExp()
     return xi.settings and xi.settings.main and xi.settings.main.IMAGINEXI_GIL_TO_EXP_ENABLED
@@ -108,7 +107,7 @@ local function openMenu(player, menuTable)
 end
 
 local function printLine(p, npc, text)
-    local name = (npc and npc.getPacketName and npc:getPacketName()) or 'Exchange'
+    local name = (npc and npc.getPacketName and npc:getPacketName()) or 'Guard'
     p:printToPlayer(text, 0, name)
 end
 
@@ -526,59 +525,29 @@ showQtyPage = function(player, fromId, toId, qtyPage)
     })
 end
 
-local function npcStillInZone(npc, zone)
-    if not npc or not zone then
-        return false
-    end
-
-    local ok, sameZone = pcall(function()
-        local npcZone = npc.getZone and npc:getZone()
-        return npcZone ~= nil and npcZone.getID and npcZone:getID() == zone:getID()
-    end)
-
-    return ok and sameZone
-end
-
-local function spawnExchangeBeside(guardNpc)
-    local zone = guardNpc and guardNpc.getZone and guardNpc:getZone()
-    if not zone or not zone.insertDynamicEntity then
-        return
-    end
-
-    local key = tostring(zone:getID()) .. ':' .. tostring(guardNpc:getID())
-    if npcStillInZone(spawnedForGuard[key], zone) then
-        return
-    end
-
-    local npc = zone:insertDynamicEntity({
-        objtype              = xi.objType.NPC,
-        name                 = 'Exchange',
-        packetName           = 'Exchange',
-        look                 = 2433,
-        x                    = guardNpc:getXPos() + 1.2,
-        y                    = guardNpc:getYPos(),
-        z                    = guardNpc:getZPos() + 0.8,
-        rotation             = guardNpc:getRotPos(),
-        widescan             = 1,
-        releaseIdOnDisappear = true,
-        onTrigger = function(player, exNpc)
-            currentNpc = exNpc
-            printLine(player, exNpc, 'Currency exchange. Menu uses short tags; pick Rates for the full CP scale.')
-            showRoot(player)
-        end,
-        onTrade = function(player, exNpc, trade)
-            printLine(player, exNpc, 'Use Trade in the menu. Rates print to chat when you open this NPC.')
-        end,
-    })
-
-    if npc then
-        spawnedForGuard[key] = npc
-    end
-end
-
 m:addOverride('xi.conquest.overseerOnTrigger', function(player, npc, guardNation, guardType, guardEvent, guardRegion)
-    spawnExchangeBeside(npc)
-    super(player, npc, guardNation, guardType, guardEvent, guardRegion)
+    currentNpc = npc
+    openMenu(player, {
+        title = 'Guard',
+        options =
+        {
+            {
+                'Conquest',
+                function(p)
+                    p:timer(MENU_DELAY_MS, function(pp)
+                        super(pp, npc, guardNation, guardType, guardEvent, guardRegion)
+                    end)
+                end,
+            },
+            {
+                'Exchange',
+                function(p)
+                    printLine(p, npc, 'Currency exchange. Menu uses short tags; pick Rates for the full CP scale.')
+                    showRoot(p)
+                end,
+            },
+        },
+    })
 end)
 
 return m

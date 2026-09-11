@@ -36,6 +36,27 @@ function M.grantExperience(player, expAmount)
     end
 end
 
+--- Match C++ CMobEntity::CanDropGil. Beasts with no gil mods stay at 0.
+---@param mob CBaseEntity
+---@return boolean
+function M.canDropGil(mob)
+    if not mob or not mob.getMobMod then
+        return false
+    end
+
+    local maxG = mob:getMobMod(xi.mobMod.GIL_MAX)
+    if maxG < 0 then
+        return false
+    end
+
+    local minG = mob:getMobMod(xi.mobMod.GIL_MIN)
+    if minG > 0 or maxG ~= 0 then
+        return true
+    end
+
+    return mob:getMobMod(xi.mobMod.GIL_BONUS) > 0
+end
+
 --- Approximate C++ CMobEntity::GetRandomGil for death conversion.
 ---@param mob CBaseEntity
 ---@return integer
@@ -81,26 +102,34 @@ function M.estimateMobGil(mob)
     return math.floor(gil)
 end
 
---- Convert would-be mob gil into XP (MOB_GIL_MULTIPLIER is 0 so no inventory gil).
+--- Claim this player's share of death-gil XP. 0 if already claimed or suppressed.
 ---@param mob CBaseEntity
 ---@param player CBaseEntity
-function M.grantMobGilAsExp(mob, player)
+---@return integer
+function M.claimMobGilAsExp(mob, player)
     if not xi.settings.main.IMAGINEXI_GIL_TO_EXP_ENABLED then
-        return
+        return 0
     end
 
     if not player or not player.isPC or not player:isPC() then
-        return
+        return 0
+    end
+
+    local claimedKey = 'IXI20_GIL_XP_P' .. player:getID()
+    if mob:getLocalVar(claimedKey) == 1 then
+        return 0
     end
 
     if mob:getLocalVar('IXI20_GIL_XP_SET') == 0 then
         mob:setLocalVar('IXI20_GIL_XP_SET', 1)
-        mob:setLocalVar('IXI20_GIL_XP', M.estimateMobGil(mob))
+        if M.canDropGil(mob) then
+            mob:setLocalVar('IXI20_GIL_XP', M.estimateMobGil(mob))
+        end
     end
 
     local total = mob:getLocalVar('IXI20_GIL_XP')
     if total <= 0 then
-        return
+        return 0
     end
 
     local tooWeakLoot = xi.ixi20_too_weak_loot
@@ -109,7 +138,7 @@ function M.grantMobGilAsExp(mob, player)
         tooWeakLoot.shouldSuppressPlayerReward and
         tooWeakLoot.shouldSuppressPlayerReward(player, mob)
     then
-        return
+        return 0
     end
 
     local shareCount = 0
@@ -129,7 +158,36 @@ function M.grantMobGilAsExp(mob, player)
         end
     end
 
-    M.grantExperience(player, M.gilToExpAmount(math.floor(total / math.max(1, shareCount))))
+    mob:setLocalVar(claimedKey, 1)
+    return M.gilToExpAmount(math.floor(total / math.max(1, shareCount)))
+end
+
+--- Fold claimed death-gil into the combat XP result (one chat line).
+---@param member CBaseEntity
+---@param mob CBaseEntity
+---@param result table|nil
+---@return table|nil
+function M.addKillGilExp(member, mob, result)
+    if not result then
+        return result
+    end
+
+    local gilExp = M.claimMobGilAsExp(mob, member)
+    if gilExp <= 0 then
+        return result
+    end
+
+    -- Match the addExp wrap: split gil with the sub, no map.EXP_RATE on that half.
+    if Ixi20PrepareSharedExp then
+        gilExp = Ixi20PrepareSharedExp(member, gilExp, false)
+    end
+
+    result.exp = (result.exp or 0) + gilExp
+    return result
+end
+
+--- Leftover onMobDeathEx wraps must not print a second XP line.
+function M.grantMobGilAsExp(_mob, _player)
 end
 
 --- Spark shop equipment pages (3-11) sell progression gear; page 1 consumables stay spark-priced.

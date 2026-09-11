@@ -2,7 +2,7 @@
 -- Imagine XI 2.0: Refresh I and II add on one effect (cap 9)
 -- Same tier recasts refresh duration and keep the combined power.
 -- Two Refresh IIs do not pile. SCH I still counts next to RDM II.
--- Sublimation still blocks I/II. One icon (xi.effect.REFRESH).
+-- Sublimation stacks (see ixi20_sublimation_stack). One icon (xi.effect.REFRESH).
 -----------------------------------
 require('modules/module_utils')
 -----------------------------------
@@ -40,14 +40,6 @@ m:addOverride('xi.spells.enhancing.useEnhancingSpell', function(caster, target, 
 
     local spellEffect = xi.effect.REFRESH
     local spellGroup  = spell:getSpellGroup()
-
-    if
-        tier < 3 and
-        (target:hasStatusEffect(xi.effect.SUBLIMATION_ACTIVATED) or target:hasStatusEffect(xi.effect.SUBLIMATION_COMPLETE))
-    then
-        spell:setMsg(xi.msg.basic.MAGIC_NO_EFFECT)
-        return 0
-    end
 
     local basePower  = xi.spells.enhancing.calculateEnhancingBasePower(caster, target, spell, spellId, spellEffect)
     local finalPower = xi.spells.enhancing.calculateEnhancingFinalPower(caster, target, spell, basePower, spellGroup, tier, spellEffect)

@@ -187,7 +187,6 @@ end)
 
 m:addOverride('xi.mob.onMobDeathEx', function(mob, player, isKiller, isWeaponSkillKill)
     super(mob, player, isKiller, isWeaponSkillKill)
-    xi.ixi20_economy.grantMobGilAsExp(mob, player)
     xi.imagine_gear_loot.onMobDeath(mob, player)
 end)
 

@@ -105,8 +105,8 @@ UPDATE `abilities` SET `level` = 9 WHERE `abilityId` = 85; -- call_beast
 UPDATE `abilities` SET `level` = 20 WHERE `abilityId` = 86; -- unlimited_shot
 UPDATE `abilities` SET `level` = 24 WHERE `abilityId` = 92; -- rampart
 UPDATE `abilities` SET `level` = 1 WHERE `abilityId` = 93; -- azure_lore
-UPDATE `abilities` SET `level` = 16 WHERE `abilityId` = 94; -- chain_affinity
-UPDATE `abilities` SET `level` = 10 WHERE `abilityId` = 95; -- burst_affinity
+-- chain_affinity / burst_affinity stay retail (40 / 25). Main and sub BLU
+-- have them always-on from 1 via ixi20_blu_affinity (JAs unused).
 UPDATE `abilities` SET `level` = 1 WHERE `abilityId` = 96; -- wild_card
 UPDATE `abilities` SET `level` = 3 WHERE `abilityId` = 97; -- phantom_roll
 UPDATE `abilities` SET `level` = 19 WHERE `abilityId` = 98; -- fighters_roll
@@ -1597,7 +1597,7 @@ UPDATE `spell_list` SET `jobs` = 0x00000000000000000000000016000000000000000000 
 UPDATE `spell_list` SET `jobs` = 0x0000000000000000000000000C000000000000000000 WHERE `spellid` = 350; -- dokumori_ichi
 UPDATE `spell_list` SET `jobs` = 0x00000000000000000000000001000000000000000000 WHERE `spellid` = 353; -- tonko_ichi
 UPDATE `spell_list` SET `jobs` = 0x00000000000000000000000010000000000000000000 WHERE `spellid` = 354; -- tonko_ni
-UPDATE `spell_list` SET `jobs` = 0x00002525250000000025000000002500000025250000 WHERE `spellid` = 360; -- dispelga
+UPDATE `spell_list` SET `jobs` = 0x00000000250000000000000000000000000000000000 WHERE `spellid` = 360; -- dispelga (RDM 37)
 UPDATE `spell_list` SET `jobs` = 0x00000000000000000003000000000000000000000000 WHERE `spellid` = 368; -- foe_requiem
 UPDATE `spell_list` SET `jobs` = 0x00000000000000000007000000000000000000000000 WHERE `spellid` = 369; -- foe_requiem_ii
 UPDATE `spell_list` SET `jobs` = 0x00000000000000000012000000000000000000000000 WHERE `spellid` = 370; -- foe_requiem_iii
