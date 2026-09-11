@@ -11,7 +11,7 @@ require('scripts/zones/GM_Home/Zone')
 local m = Module:new('ixi20_sky_gmhome')
 
 local GROUP_ID      = 5
-local GROUP_ZONE_ID = 154 -- Dragon's Aery template; look / stats overridden
+local GROUP_ZONE_ID = 154 -- Dragon's Aery template; look / skill lists overridden
 local NPC_LOOK      = 803
 local NPC_X, NPC_Y, NPC_Z, NPC_ROT = 8.0, 0.0, -10.0, 0
 
@@ -211,14 +211,6 @@ local function spawnKirin(zone, x, y, z, rot)
             tryKirinAdd(mobArg)
             if xi.ixi20Sky and xi.ixi20Sky.onKirinFight then
                 xi.ixi20Sky.onKirinFight(mobArg)
-            end
-        end,
-        onMobDeath           = function(mobArg)
-            local home = mobArg.getZone and mobArg:getZone()
-            if home then
-                for _, name in ipairs(GODS) do
-                    despawnList(findByLookup(home, 'DE_' .. name))
-                end
             end
         end,
     })

@@ -1,7 +1,8 @@
 -----------------------------------
 -- Imagine XI 1.0 JA windows (module only)
 -- Cascade: 8 min +10 MATT (10% MAB), does not consume on the next nuke
--- Accession / Manifestation: 45s multi-spell windows
+-- Manifestation: 45s multi-spell window (charge-free via ixi20_caster_kit)
+-- Accession is always-on in ixi20_caster_kit (main and sub SCH)
 -- Diffusion is always-on in ixi20_blu_affinity (main and sub BLU)
 -- Do not return this module.
 -----------------------------------
@@ -13,14 +14,12 @@ local m = Module:new('ixi20_ja_windows')
 local WINDOW_SECONDS =
 {
     [xi.effect.CASCADE]       = 480,
-    [xi.effect.ACCESSION]     = 45,
     [xi.effect.MANIFESTATION] = 45,
 }
 
 local JOB_FOR_EFFECT =
 {
     [xi.effect.CASCADE]       = xi.job.BLM,
-    [xi.effect.ACCESSION]     = xi.job.SCH,
     [xi.effect.MANIFESTATION] = xi.job.SCH,
 }
 
@@ -159,11 +158,11 @@ m:addOverride('xi.job_utils.black_mage.useCascade', function(player, target, abi
     return applyTimedWindow(player, xi.effect.CASCADE)
 end)
 
-m:addOverride('xi.actions.abilities.accession.onUseAbility', function(player, target, ability)
-    return applyTimedWindow(player, xi.effect.ACCESSION)
-end)
-
 m:addOverride('xi.actions.abilities.manifestation.onUseAbility', function(player, target, ability)
+    if ability and ability.setRecast then
+        ability:setRecast(0)
+    end
+
     return applyTimedWindow(player, xi.effect.MANIFESTATION)
 end)
 
@@ -216,10 +215,19 @@ m:addOverride('xi.player.onGameIn', function(player, firstLogin, zoning)
     super(player, firstLogin, zoning)
     if zoning or firstLogin then
         clearWindow(player, xi.effect.CASCADE)
-        clearWindow(player, xi.effect.ACCESSION)
         clearWindow(player, xi.effect.MANIFESTATION)
         setCascadeMatt(player, false)
     end
 
     attachWindows(player)
 end)
+
+if xi.actions and xi.actions.abilities and xi.actions.abilities.manifestation then
+    xi.actions.abilities.manifestation.onUseAbility = function(player, target, ability)
+        if ability and ability.setRecast then
+            ability:setRecast(0)
+        end
+
+        return applyTimedWindow(player, xi.effect.MANIFESTATION)
+    end
+end

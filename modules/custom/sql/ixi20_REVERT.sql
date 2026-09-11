@@ -80,7 +80,15 @@ INNER JOIN `ixi20_cascade_recast_backup` b ON b.`abilityId` = a.`abilityId`
 SET a.`recastTime` = b.`recastTime`;
 
 UPDATE `abilities` a
+INNER JOIN `ixi20_manifestation_recast_backup` b ON b.`abilityId` = a.`abilityId`
+SET a.`recastTime` = b.`recastTime`;
+
+UPDATE `abilities` a
 INNER JOIN `ixi20_mana_wall_recast_backup` b ON b.`abilityId` = a.`abilityId`
+SET a.`recastTime` = b.`recastTime`;
+
+UPDATE `abilities` a
+INNER JOIN `ixi20_sa_window_recast_backup` b ON b.`abilityId` = a.`abilityId`
 SET a.`recastTime` = b.`recastTime`;
 
 UPDATE `skill_ranks` s
@@ -106,7 +114,9 @@ DROP TABLE IF EXISTS `ixi20_spell_jobs_backup`;
 DROP TABLE IF EXISTS `ixi20_abilities_charges_backup`;
 DROP TABLE IF EXISTS `ixi20_sch_ability_level_backup`;
 DROP TABLE IF EXISTS `ixi20_cascade_recast_backup`;
+DROP TABLE IF EXISTS `ixi20_manifestation_recast_backup`;
 DROP TABLE IF EXISTS `ixi20_mana_wall_recast_backup`;
+DROP TABLE IF EXISTS `ixi20_sa_window_recast_backup`;
 DROP TABLE IF EXISTS `ixi20_skill_ranks_backup`;
 
 -- AF1 weapons (ixi20_af1_weapons.sql). Run before no_perpetuation revert so

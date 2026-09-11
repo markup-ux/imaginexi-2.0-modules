@@ -41,6 +41,11 @@ local GARDEN_SKILL =
     Suzaku = 280,
 }
 
+-- Shrine Kirin (Deadly Hold / Tail Swing / Heat Breath / sandstorm / whirlwind).
+-- GM Home copies spawn from Fafnir's group and would otherwise use Dragon Breath
+-- / Horrid Roar, which have no Kirin animation.
+local KIRIN_SKILL = 281
+
 local RATE =
 {
     [xi.drop_rate.GUARANTEED]  = 1000,
@@ -792,6 +797,7 @@ function xi.ixi20Sky.onKirinSpawn(mob)
     end
 
     applyApex(mob, APEX.Kirin)
+    mob:setMobMod(xi.mobMod.SKILL_LIST, KIRIN_SKILL)
     mob:setLocalVar('godSpawnTime', GetSystemTime() + setting('IMAGINEXI_KIRIN_FIRST_ADD_SECONDS', 60))
     mob:setLocalVar('[sky]lastAdds', 0)
     mob:setLocalVar('[sky]kirinAdds', 0)
@@ -885,4 +891,20 @@ end)
 
 wrapHook('The_Shrine_of_RuAvitau', 'Kirin', 'onMobFight', function(mob)
     xi.ixi20Sky.onKirinFight(mob)
+end)
+
+-- Stock callPets uses dieWithOwner. These are the garden gods now, not dummy pets.
+m:addOverride('xi.mob.callPets', function(mob, petIds, params)
+    if isShrineKirin(mob) then
+        local copy = {}
+        for key, value in pairs(params or {}) do
+            copy[key] = value
+        end
+
+        copy.dieWithOwner   = false
+        copy.persistOnDeath = true
+        params = copy
+    end
+
+    return super(mob, petIds, params)
 end)

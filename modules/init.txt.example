@@ -40,6 +40,8 @@ custom/lua/ixi20_sch_stratagem_refund.lua
 custom/cpp/ixi20_sch_stratagem_refund.cpp
 custom/lua/ixi20_thf.lua
 custom/cpp/ixi20_thf.cpp
+custom/lua/ixi20_sa_window.lua
+custom/sql/ixi20_sa_window.sql
 custom/lua/ixi20_dnc.lua
 
 # --- Combat ---
@@ -56,6 +58,9 @@ custom/cpp/ixi20_infinite_ammo.cpp
 custom/cpp/ixi20_ninja_tools.cpp
 custom/lua/ixi20_ja_windows.lua
 custom/sql/ixi20_ja_windows.sql
+custom/lua/ixi20_caster_kit.lua
+custom/cpp/ixi20_caster_kit.cpp
+custom/sql/ixi20_caster_kit.sql
 custom/lua/ixi20_mana_wall.lua
 custom/sql/ixi20_mana_wall.sql
 custom/lua/ixi20_benediction_mp.lua

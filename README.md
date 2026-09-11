@@ -76,6 +76,7 @@ IMAGINEXI_KIRIN_ADD_INTERVAL_SECONDS = 90
 | `ixi20_sch_arts_skill` | Light / Dark Arts grant +15 skill to the matching schools |
 | `ixi20_sch_stratagem_refund` | Manifestation / Accession on 3+ targets refunds one Stratagem charge |
 | `ixi20_thf` | Flee and Hide hit the nearby party. Crits shave 1s off every JA recast |
+| `ixi20_sa_window` | Main THF: Sneak Attack is a 30s window (not consumed). Recast 90s. Sub THF stays retail |
 | `ixi20_dnc` | Chocobo Jig uses Flee speed and hits the party; Spectral Jig also parties |
 
 ## Combat
@@ -88,7 +89,8 @@ IMAGINEXI_KIRIN_ADD_INTERVAL_SECONDS = 90
 | `ixi20_bind_kite` | Bind holds through a few hits for kiting |
 | `ixi20_infinite_ammo` | Combat ammo is not consumed |
 | `ixi20_ninja_tools.cpp` | Ninjutsu needs no tools |
-| `ixi20_ja_windows` | Cascade 8 min 10% MAB; 45s Accession / Manifestation |
+| `ixi20_ja_windows` | Cascade 8 min 10% MAB; 45s Manifestation window |
+| `ixi20_caster_kit` | Magic closes existing WS skillchains; Accession always-on for SCH; Manifestation is free |
 | `ixi20_mana_wall` | Mana Wall is a toggle |
 | `ixi20_benediction_mp` | Benediction also restores MP |
 | `ixi20_sp_uptime` | Timed two-hours / one-hours last 2 minutes |
@@ -161,7 +163,7 @@ IMAGINEXI_KIRIN_ADD_INTERVAL_SECONDS = 90
 | `ixi20_death_repop` | Mobs that despawn without dying respawn in 1s |
 | `ixi20_starter_hnm` | Lowbie HNMs in the six nation fields |
 | `ixi20_hnm_access` / `ixi20_hnm_claim` / `ixi20_hnm_difficulty` / `ixi20_hnm_packages` | Timed respawns, lottery claim, 3× HP, no Sleep, apex skills |
-| `ixi20_sky` | Ru'Aun gods + Kirin: 1.75× / 2× HP, full healer pressure, 3h god lockout, no pixie. Genbu's carapace breaks on a weaponskill or magic. Kirin summons the garden gods (stats, skill lists, full drop tables) |
+| `ixi20_sky` | Ru'Aun gods + Kirin: 1.75× / 2× HP, full healer pressure, 3h god lockout, no pixie. Genbu's carapace breaks on a weaponskill or magic. Kirin summons the garden gods (stats, skill lists, full drop tables); they stay up after he dies |
 | `ixi20_dragons_aery_pop` | Dragon's Aery ??? pops Fafnir or Nidhogg at random |
 | `ixi20_nm_restart_spawn` | Timed / lottery NMs up when the map process starts |
 | `ixi20_pixie_rescue` | A spirit raises you on death (weakness stays) |

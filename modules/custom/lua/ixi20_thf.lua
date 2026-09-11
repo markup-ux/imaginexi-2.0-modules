@@ -2,7 +2,8 @@
 -- Imagine XI 2.0: THF Flee / Hide party buffs + crit JA recast trait.
 -- Flee and Hide apply to nearby party members (and trusts), same duration.
 -- Main or sub THF: each melee / weaponskill critical shaves 1s off every
--- job-ability recast. Pair with ixi20_thf.cpp (rebuild xi_map).
+-- job-ability recast except Sneak Attack (ixi20_sa_window). Pair with
+-- ixi20_thf.cpp (rebuild xi_map).
 -- Do not return this module.
 -----------------------------------
 require('modules/module_utils')

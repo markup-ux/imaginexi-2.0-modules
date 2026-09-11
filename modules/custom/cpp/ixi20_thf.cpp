@@ -55,6 +55,12 @@ auto luaIxi20ReduceAbilityRecasts(lua_State* L) -> int
                     continue;
                 }
 
+                // Sneak Attack recastId 64: ixi20_sa_window must not chain off crits.
+                if (recast.ID == static_cast<Recast>(64))
+                {
+                    continue;
+                }
+
                 recast.RecastTime -= reduction;
                 if (recast.RecastTime < 0s)
                 {
@@ -91,7 +97,7 @@ public:
         }
 
         lua_register(L, "Ixi20ReduceAbilityRecasts", luaIxi20ReduceAbilityRecasts);
-        ShowInfo("Imagine XI 2.0: THF crits reduce all job-ability recasts by 1s");
+        ShowInfo("Imagine XI 2.0: THF crits reduce job-ability recasts by 1s (except Sneak Attack)");
     }
 };
 
