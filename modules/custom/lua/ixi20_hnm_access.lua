@@ -28,6 +28,17 @@ local function lockoutSeconds()
     return setting('IMAGINEXI_HNM_LOCKOUT_SECONDS', 12 * 3600)
 end
 
+local function lockoutSecondsFor(mob)
+    if xi.ixi20Sky and xi.ixi20Sky.lockoutSeconds then
+        local custom = xi.ixi20Sky.lockoutSeconds(mob)
+        if custom then
+            return custom
+        end
+    end
+
+    return lockoutSeconds()
+end
+
 local function timedRespawnSeconds()
     return setting('IMAGINEXI_HNM_TIMED_RESPAWN_SECONDS', 20 * 60)
 end
@@ -71,7 +82,8 @@ xi.ixi20HnmAccess.lockAlliance = function(player, mob)
         return
     end
 
-    local untilTime = GetSystemTime() + lockoutSeconds()
+    local duration  = lockoutSecondsFor(mob)
+    local untilTime = GetSystemTime() + duration
     local var       = lockVar(mob:getName())
     local alliance  = player:getAlliance()
     local stamped   = {}
@@ -91,7 +103,7 @@ xi.ixi20HnmAccess.lockAlliance = function(player, mob)
         member:printToPlayer(string.format(
             '%s lockout: %s. Another group can pop the next one.',
             mob:getPacketName(),
-            formatRemain(lockoutSeconds())
+            formatRemain(duration)
         ), xi.msg.channel.SYSTEM_3, '')
     end
 

@@ -668,6 +668,20 @@ function xi.pixieRescue.dispatchToPlayer(player, options)
         return false, 'not_dead'
     end
 
+    if
+        not options.ignoreHnm and
+        xi.ixi20Sky and
+        xi.ixi20Sky.blocksPixie and
+        xi.ixi20Sky.blocksPixie(player)
+    then
+        if player:getLocalVar('[sky]pixieTold') ~= 1 then
+            player:setLocalVar('[sky]pixieTold', 1)
+            rescueChat(player, '[Pixie] A notorious presence holds your spirit. This fight will not spare you.')
+        end
+
+        return false, 'hnm'
+    end
+
     if not options.ignoreReraise and player:hasStatusEffect(xi.effect.RERAISE) then
         return false, 'reraise'
     end
@@ -885,7 +899,7 @@ xi.module.registerCommand('pixierescue', {
                     for _, p in pairs(zone:getPlayers() or {}) do
                         if p and p:isPC() and p:isDead() then
                             deadFound = deadFound + 1
-                            local ok, reason = xi.pixieRescue.dispatchToPlayer(p, { ignoreReraise = false })
+                            local ok, reason = xi.pixieRescue.dispatchToPlayer(p, { ignoreReraise = false, ignoreHnm = true })
                             if ok then
                                 dispatched = dispatched + 1
                             elseif reason == 'reraise' then

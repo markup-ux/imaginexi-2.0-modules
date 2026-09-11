@@ -35,6 +35,12 @@ IMAGINEXI_HNM_CLAIM_SHIELD_MS = 10000
 IMAGINEXI_HNM_CLAIM_IDLE_SECONDS = 90
 IMAGINEXI_HNM_LOCKOUT_SECONDS = 43200
 IMAGINEXI_HNM_TIMED_RESPAWN_SECONDS = 1200
+IMAGINEXI_HNM_BLOCK_PIXIE = true
+IMAGINEXI_SKY_HP_MULTIPLIER = 1.75
+IMAGINEXI_KIRIN_HP_MULTIPLIER = 2.0
+IMAGINEXI_SKY_LOCKOUT_SECONDS = 10800
+IMAGINEXI_KIRIN_FIRST_ADD_SECONDS = 60
+IMAGINEXI_KIRIN_ADD_INTERVAL_SECONDS = 90
 ```
 
 ## Jobs and progression
@@ -155,6 +161,7 @@ IMAGINEXI_HNM_TIMED_RESPAWN_SECONDS = 1200
 | `ixi20_death_repop` | Mobs that despawn without dying respawn in 1s |
 | `ixi20_starter_hnm` | Lowbie HNMs in the six nation fields |
 | `ixi20_hnm_access` / `ixi20_hnm_claim` / `ixi20_hnm_difficulty` / `ixi20_hnm_packages` | Timed respawns, lottery claim, 3× HP, no Sleep, apex skills |
+| `ixi20_sky` | Ru'Aun gods + Kirin: 1.75× / 2× HP, full healer pressure, 3h god lockout, no pixie. Genbu's carapace breaks on a weaponskill or magic. Kirin summons the garden gods (stats, skill lists, full drop tables) |
 | `ixi20_dragons_aery_pop` | Dragon's Aery ??? pops Fafnir or Nidhogg at random |
 | `ixi20_nm_restart_spawn` | Timed / lottery NMs up when the map process starts |
 | `ixi20_pixie_rescue` | A spirit raises you on death (weakness stays) |
@@ -168,7 +175,8 @@ IMAGINEXI_HNM_TIMED_RESPAWN_SECONDS = 1200
 | `ixi20_leftover_magic_menu` | Client leftover-spell menu fix (needs a DAT) |
 | `ixi20_overlay_hair` | Overlay hairstyle sync (`!ixihair`); people without the overlay see the real style |
 | `ixi20_gm_home_test_*` | GM Home test dummy / vendor / XP hares |
-| `ixi20_godmode_persist` | Re-applies `!godmode` after raise |
+| `ixi20_sky_gmhome` | GM Home Sky bench (`!skytest` / Sky Tester NPC). Test kills do not lock Ru'Aun |
+| `ixi20_godmode_persist` | Re-applies `!godmode` / `!immortal` after raise, and after mob Dispel of Regen / Refresh / HP-MP Boost |
 | `ixi20_nm_spawn` | GM `!spawnnms` |
 | `ixi20_bis` | GM `!bis` |
 | `ixi20_job_change.cpp` | Job-change packet trace |

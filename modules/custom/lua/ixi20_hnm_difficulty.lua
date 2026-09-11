@@ -37,6 +37,13 @@ local function applyAllowlistStats(mob)
     end
 
     local hpMult   = setting('IMAGINEXI_HNM_HP_MULTIPLIER', 3.0)
+    if xi.ixi20Sky and xi.ixi20Sky.hpMultiplier then
+        local custom = xi.ixi20Sky.hpMultiplier(mob)
+        if custom then
+            hpMult = custom
+        end
+    end
+
     local statMult = setting('IMAGINEXI_HNM_STAT_MULTIPLIER', 2.0)
     local storeTp  = setting('IMAGINEXI_HNM_STORE_TP', 60)
 
@@ -64,16 +71,18 @@ local function applyAllowlistStats(mob)
 end
 
 for _, target in ipairs(xi.ixi20Hnm.worldTargets) do
-    m:addOverride(xi.ixi20Hnm.overridePath(target.zone, target.mob, 'onMobInitialize'), function(mob)
-        super(mob)
-        xi.hnmAntiMelt.attach(mob)
-        xi.healerPressure.attach(mob)
-    end)
+    if xi.ixi20Hnm.isPackageTarget(target) then
+        m:addOverride(xi.ixi20Hnm.overridePath(target.zone, target.mob, 'onMobInitialize'), function(mob)
+            super(mob)
+            xi.hnmAntiMelt.attach(mob)
+            xi.healerPressure.attach(mob)
+        end)
 
-    m:addOverride(xi.ixi20Hnm.overridePath(target.zone, target.mob, 'onMobSpawn'), function(mob)
-        super(mob)
-        applyAllowlistStats(mob)
-        xi.hnmAntiMelt.applyBase(mob)
-        xi.healerPressure.onSpawn(mob)
-    end)
+        m:addOverride(xi.ixi20Hnm.overridePath(target.zone, target.mob, 'onMobSpawn'), function(mob)
+            super(mob)
+            applyAllowlistStats(mob)
+            xi.hnmAntiMelt.applyBase(mob)
+            xi.healerPressure.onSpawn(mob)
+        end)
+    end
 end

@@ -1,8 +1,9 @@
 -----------------------------------
--- Imagine XI 2.0: keep !godmode / !immortal across death and raise.
+-- Imagine XI 2.0: keep !godmode / !immortal across death, raise, and dispel.
 -- Stock death strips every godmode buff (they all carry the death flag).
--- Raise does not re-apply them; onGameIn only restores after zone/login.
--- Pixie rescue then overwrote Invincible / Regen with short safety buffs.
+-- Regen / Refresh / Max HP-MP Boost also carry DISPELABLE, so mob skills
+-- (Dispelling Wind, Horrid Roar, etc.) can strip them. Raise and onGameIn
+-- do not put those back. Pixie rescue must not replace Invincible with a 15s copy.
 -----------------------------------
 require('modules/module_utils')
 -----------------------------------
@@ -12,38 +13,111 @@ local m = Module:new('ixi20_godmode_persist')
 xi = xi or {}
 xi.ixi20GodMode = xi.ixi20GodMode or {}
 
-local LISTENER_ID = 'IXI20_GODMODE_PERSIST'
-local TOKEN_VAR   = 'IXI20_GM_RESTORE_T'
+local DEATH_LISTENER = 'IXI20_GODMODE_PERSIST'
+local GAIN_LISTENER  = 'IXI20_GODMODE_HARDEN'
+local LOSE_LISTENER  = 'IXI20_GODMODE_REAPPLY'
+local TOKEN_VAR      = 'IXI20_GM_RESTORE_T'
+local LOSE_VAR       = 'IXI20_GM_LOSE_T'
 local POLL_MS     = 250
 local POLL_MAX_MS = 60 * 60 * 1000
+local LOSE_DELAY_MS = 100
+
+-- These four are the ones mob Dispel can actually take (YAML: dispelable).
+-- Invincible and the 2-hours are not dispelable; they still get hardened.
+local GODMODE_EFFECTS =
+{
+    [xi.effect.MAX_HP_BOOST]      = true,
+    [xi.effect.MAX_MP_BOOST]      = true,
+    [xi.effect.MIGHTY_STRIKES]    = true,
+    [xi.effect.HUNDRED_FISTS]     = true,
+    [xi.effect.CHAINSPELL]        = true,
+    [xi.effect.PERFECT_DODGE]     = true,
+    [xi.effect.INVINCIBLE]        = true,
+    [xi.effect.ELEMENTAL_SFORZO]  = true,
+    [xi.effect.MANAFONT]          = true,
+    [xi.effect.REGAIN]            = true,
+    [xi.effect.REFRESH]           = true,
+    [xi.effect.REGEN]             = true,
+}
+
+local function modeEffects(mode)
+    if mode == 1 then
+        return {
+            { xi.effect.MAX_HP_BOOST,     1000 },
+            { xi.effect.MAX_MP_BOOST,     1000 },
+            { xi.effect.MIGHTY_STRIKES,   1    },
+            { xi.effect.HUNDRED_FISTS,    1    },
+            { xi.effect.CHAINSPELL,       1    },
+            { xi.effect.PERFECT_DODGE,    1    },
+            { xi.effect.INVINCIBLE,       1    },
+            { xi.effect.ELEMENTAL_SFORZO, 1    },
+            { xi.effect.MANAFONT,         1    },
+            { xi.effect.REGAIN,           300  },
+            { xi.effect.REFRESH,          99   },
+            { xi.effect.REGEN,            99   },
+        }
+    end
+
+    if mode == 2 then
+        return {
+            { xi.effect.MAX_HP_BOOST, 200 },
+            { xi.effect.REGAIN,       50  },
+            { xi.effect.REFRESH,      999 },
+            { xi.effect.REGEN,        999 },
+            { xi.effect.CHAINSPELL,   1   },
+            { xi.effect.MANAFONT,     1   },
+        }
+    end
+
+    return {}
+end
+
+local function hardenEffect(effect)
+    if not effect then
+        return
+    end
+
+    -- YAML ORs DISPELABLE onto Regen / Refresh / HP-MP Boost after add.
+    -- Duration 0 already blocks stock dispelStatusEffect; this covers
+    -- overwrite (a timed Regen replacing ours) and DelStatusEffectsByFlag.
+    effect:delEffectFlag(xi.effectFlag.DISPELABLE)
+    effect:delEffectFlag(xi.effectFlag.ERASABLE)
+end
+
+local function hardenPlayer(player)
+    for effectId, _ in pairs(GODMODE_EFFECTS) do
+        hardenEffect(player:getStatusEffect(effectId))
+    end
+end
+
+local function applyOne(player, effectId, power)
+    local existing = player:getStatusEffect(effectId)
+    if existing then
+        if existing:getPower() < power or existing:getDuration() > 0 then
+            player:delStatusEffectSilent(effectId)
+        else
+            hardenEffect(existing)
+            return
+        end
+    end
+
+    player:addStatusEffect(effectId, { power = power, origin = player })
+    hardenEffect(player:getStatusEffect(effectId))
+end
 
 local function restoreGodModeEffects(player)
     local mode = player:getCharVar('GodMode')
-    if mode == 1 then
-        player:addStatusEffect(xi.effect.MAX_HP_BOOST, { power = 1000, origin = player })
-        player:addStatusEffect(xi.effect.MAX_MP_BOOST, { power = 1000, origin = player })
-        player:addStatusEffect(xi.effect.MIGHTY_STRIKES, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.HUNDRED_FISTS, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.CHAINSPELL, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.PERFECT_DODGE, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.INVINCIBLE, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.ELEMENTAL_SFORZO, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.MANAFONT, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.REGAIN, { power = 300, origin = player })
-        player:addStatusEffect(xi.effect.REFRESH, { power = 99, origin = player })
-        player:addStatusEffect(xi.effect.REGEN, { power = 99, origin = player })
-        player:addHP(50000)
-        player:setMP(50000)
-    elseif mode == 2 then
-        player:addStatusEffect(xi.effect.MAX_HP_BOOST, { power = 200, origin = player })
-        player:addStatusEffect(xi.effect.REGAIN, { power = 50, origin = player })
-        player:addStatusEffect(xi.effect.REFRESH, { power = 999, origin = player })
-        player:addStatusEffect(xi.effect.REGEN, { power = 999, origin = player })
-        player:addStatusEffect(xi.effect.CHAINSPELL, { power = 1, origin = player })
-        player:addStatusEffect(xi.effect.MANAFONT, { power = 1, origin = player })
-        player:addHP(50000)
-        player:setMP(50000)
+    local list = modeEffects(mode)
+    if #list == 0 then
+        return
     end
+
+    for i = 1, #list do
+        applyOne(player, list[i][1], list[i][2])
+    end
+
+    player:addHP(50000)
+    player:setMP(50000)
 end
 
 local function restoreImmortal(player)
@@ -64,17 +138,43 @@ function xi.ixi20GodMode.hasActive(player)
     return player:getCharVar('GodMode') ~= 0
 end
 
-function xi.ixi20GodMode.restoreAfterRaise(player)
-    if not player or not player.isPC or not player:isPC() then
-        return
+local function canRestoreNow(player)
+    if not xi.ixi20GodMode.hasActive(player) then
+        return false
     end
 
-    if player.getGMLevel and player:getGMLevel() <= 0 then
+    if not player:isAlive() or player:getHP() <= 0 then
+        return false
+    end
+
+    -- Mid-zone loc.zone is nil. Do not re-apply while effects are being dropped for transition.
+    if not player.getZone or not player:getZone() then
+        return false
+    end
+
+    return true
+end
+
+function xi.ixi20GodMode.restoreAfterRaise(player)
+    if not canRestoreNow(player) then
         return
     end
 
     restoreGodModeEffects(player)
     restoreImmortal(player)
+end
+
+local function scheduleLoseRestore(player)
+    local token = player:getLocalVar(LOSE_VAR) + 1
+    player:setLocalVar(LOSE_VAR, token)
+
+    player:timer(LOSE_DELAY_MS, function(p)
+        if not p or p:getLocalVar(LOSE_VAR) ~= token then
+            return
+        end
+
+        xi.ixi20GodMode.restoreAfterRaise(p)
+    end)
 end
 
 local function pollUntilAlive(player, token, elapsedMs)
@@ -104,8 +204,11 @@ local function attach(player)
         return
     end
 
-    player:removeListener(LISTENER_ID)
-    player:addListener('DEATH', LISTENER_ID, function(deadPlayer)
+    player:removeListener(DEATH_LISTENER)
+    player:removeListener(GAIN_LISTENER)
+    player:removeListener(LOSE_LISTENER)
+
+    player:addListener('DEATH', DEATH_LISTENER, function(deadPlayer)
         if not xi.ixi20GodMode.hasActive(deadPlayer) and deadPlayer:getCharVar('Immortal') ~= 1 then
             return
         end
@@ -114,6 +217,35 @@ local function attach(player)
         deadPlayer:setLocalVar(TOKEN_VAR, token)
         pollUntilAlive(deadPlayer, token, 0)
     end)
+
+    player:addListener('EFFECT_GAIN', GAIN_LISTENER, function(owner, effect)
+        if not effect or not xi.ixi20GodMode.hasActive(owner) then
+            return
+        end
+
+        if GODMODE_EFFECTS[effect:getEffectType()] then
+            hardenEffect(effect)
+        end
+    end)
+
+    player:addListener('EFFECT_LOSE', LOSE_LISTENER, function(owner, effect)
+        if not effect or not xi.ixi20GodMode.hasActive(owner) then
+            return
+        end
+
+        if not GODMODE_EFFECTS[effect:getEffectType()] then
+            return
+        end
+
+        -- !godmode off sets the charvar to 0 before deleting effects, so
+        -- hasActive is already false. Death / zone-out are skipped in the timer.
+        scheduleLoseRestore(owner)
+    end)
+
+    if xi.ixi20GodMode.hasActive(player) then
+        hardenPlayer(player)
+        scheduleLoseRestore(player)
+    end
 end
 
 m:addOverride('xi.player.onGameIn', function(player, firstLogin, zoning)

@@ -7,7 +7,8 @@ xi.ixi20Hnm = xi.ixi20Hnm or {}
 
 -- itemPop: retail ??? trade. Do not auto-spawn on map start.
 -- timed: world window. Fast death respawn + restart spawn.
--- (no flag): pet / event copy. Difficulty only.
+-- add: Kirin / pet copy. No difficulty, claim, or lockout.
+-- event: Strange Happenings / other scripted copy. Skip packages.
 xi.ixi20Hnm.worldTargets =
 {
     { zone = 'Dragons_Aery',           mob = 'Fafnir',             itemPop = true },
@@ -20,11 +21,10 @@ xi.ixi20Hnm.worldTargets =
     { zone = 'RuAun_Gardens',          mob = 'Seiryu',             itemPop = true },
     { zone = 'RuAun_Gardens',          mob = 'Byakko',             itemPop = true },
     { zone = 'RuAun_Gardens',          mob = 'Suzaku',             itemPop = true },
-    { zone = 'RuAun_Gardens',          mob = 'Kirin' },
-    { zone = 'The_Shrine_of_RuAvitau', mob = 'Genbu' },
-    { zone = 'The_Shrine_of_RuAvitau', mob = 'Seiryu' },
-    { zone = 'The_Shrine_of_RuAvitau', mob = 'Byakko' },
-    { zone = 'The_Shrine_of_RuAvitau', mob = 'Suzaku' },
+    { zone = 'The_Shrine_of_RuAvitau', mob = 'Genbu',              add = true },
+    { zone = 'The_Shrine_of_RuAvitau', mob = 'Seiryu',             add = true },
+    { zone = 'The_Shrine_of_RuAvitau', mob = 'Byakko',             add = true },
+    { zone = 'The_Shrine_of_RuAvitau', mob = 'Suzaku',             add = true },
     { zone = 'The_Shrine_of_RuAvitau', mob = 'Kirin',              itemPop = true },
     { zone = 'Attohwa_Chasm',          mob = 'Tiamat',             timed = true },
     { zone = 'Uleguerand_Range',       mob = 'Jormungand',         timed = true },
@@ -38,6 +38,30 @@ xi.ixi20Hnm.worldTargets =
     { zone = 'Jugner_Forest',          mob = 'King_Arthro',        timed = true },
     { zone = 'Labyrinth_of_Onzozo',    mob = 'Lord_of_Onzozo',     timed = true },
 }
+
+xi.ixi20Hnm.zoneId =
+{
+    Dragons_Aery           = xi.zone.DRAGONS_AERY,
+    Valley_of_Sorrows      = xi.zone.VALLEY_OF_SORROWS,
+    Behemoths_Dominion     = xi.zone.BEHEMOTHS_DOMINION,
+    RuAun_Gardens          = xi.zone.RUAUN_GARDENS,
+    The_Shrine_of_RuAvitau = xi.zone.THE_SHRINE_OF_RUAVITAU,
+    Attohwa_Chasm          = xi.zone.ATTOHWA_CHASM,
+    Uleguerand_Range       = xi.zone.ULEGUERAND_RANGE,
+    King_Ranperres_Tomb    = xi.zone.KING_RANPERRES_TOMB,
+    Sauromugue_Champaign   = xi.zone.SAUROMUGUE_CHAMPAIGN,
+    Rolanberry_Fields      = xi.zone.ROLANBERRY_FIELDS,
+    Mount_Zhayolm          = xi.zone.MOUNT_ZHAYOLM,
+    Caedarva_Mire          = xi.zone.CAEDARVA_MIRE,
+    Garlaige_Citadel       = xi.zone.GARLAIGE_CITADEL,
+    FeiYin                 = xi.zone.FEIYIN,
+    Jugner_Forest          = xi.zone.JUGNER_FOREST,
+    Labyrinth_of_Onzozo    = xi.zone.LABYRINTH_OF_ONZOZO,
+}
+
+xi.ixi20Hnm.isPackageTarget = function(target)
+    return target and not target.add and not target.event
+end
 
 xi.ixi20Hnm.targetKey = function(zoneName, mobName)
     return zoneName .. ':' .. mobName

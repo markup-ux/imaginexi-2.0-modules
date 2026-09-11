@@ -85,8 +85,21 @@ local function getConfig(mob)
 end
 
 local function pressureScale(mob)
+    if xi.ixi20Sky and xi.ixi20Sky.fullPressure and xi.ixi20Sky.fullPressure(mob) then
+        return 1.0
+    end
+
     local count = math.min(6, math.max(1, xi.hnmAntiMelt.countEngagedRealPlayers(mob)))
     return xi.healerPressure.scalingByPlayers[count] or 1.0
+end
+
+local function pulseInterval(mob, config)
+    local interval = config.pulse.intervalS
+    if xi.ixi20Sky and xi.ixi20Sky.pulseInterval then
+        interval = xi.ixi20Sky.pulseInterval(mob, interval) or interval
+    end
+
+    return interval
 end
 
 local function pulseTargets(mob)
@@ -161,7 +174,7 @@ local function tryPulse(mob)
     mob:setLocalVar('[healerPressure]lastTick', now)
 
     if nextAt == 0 or (lastTick > 0 and now - lastTick > xi.healerPressure.settings.ENGAGE_GAP_S) then
-        mob:setLocalVar('[healerPressure]nextPulseAt', now + config.pulse.intervalS)
+        mob:setLocalVar('[healerPressure]nextPulseAt', now + pulseInterval(mob, config))
         return
     end
 
@@ -170,7 +183,7 @@ local function tryPulse(mob)
     end
 
     mob:setLocalVar('[healerPressure]pulsePending', 1)
-    mob:setLocalVar('[healerPressure]nextPulseAt', now + config.pulse.intervalS)
+    mob:setLocalVar('[healerPressure]nextPulseAt', now + pulseInterval(mob, config))
     telegraph(mob, config.pulse.message or elementTelegraph[config.pulse.element])
 
     mob:timer(xi.healerPressure.settings.TELEGRAPH_WINDUP_MS, function(mobArg)

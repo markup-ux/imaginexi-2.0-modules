@@ -146,6 +146,7 @@ custom/lua/ixi20_hnm_access.lua
 custom/lua/ixi20_dragons_aery_pop.lua
 custom/lua/ixi20_hnm_claim.lua
 custom/lua/ixi20_hnm_difficulty.lua
+custom/lua/ixi20_sky.lua
 custom/lua/ixi20_hnm_packages.lua
 custom/cpp/ixi20_hnm_packages.cpp
 custom/lua/ixi20_nm_restart_spawn.lua
@@ -160,6 +161,7 @@ custom/lua/ixi20_whm_bar_enspell.lua
 # custom/lua/ixi20_overlay_hair.lua
 # custom/lua/ixi20_gm_home_test_mobs.lua
 # custom/lua/ixi20_gm_home_test_hub.lua
+# custom/lua/ixi20_sky_gmhome.lua
 # custom/lua/ixi20_godmode_persist.lua
 # custom/lua/ixi20_nm_spawn.lua
 # custom/lua/ixi20_bis.lua
