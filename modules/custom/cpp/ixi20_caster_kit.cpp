@@ -5,8 +5,8 @@
  *   weaponskill skillchain. It never opens a new window. Failed closes
  *   leave the WS resonance alone. Immanence and BLU Chain Affinity stay
  *   the openers. SCH helix closes still stretch the burst window.
- * - Permanent Accession does not double MP or recast.
- * - Manifestation costs 0 charges (still a timed window in Lua).
+ * - Toggled-on Accession does not double MP or recast.
+ * - Accession and Manifestation cost 0 charges (Lua toggles).
  *
  * Pair with ixi20_caster_kit.lua / .sql. Rebuild xi_map.
  ************************************************************************/
@@ -429,51 +429,16 @@ uint16 hookedCalculateSpellCost(CBattleEntity* PEntity, CSpell* PSpell)
     return std::clamp<int16>(cost, 0, 9999);
 }
 
-struct MagicStatePeek : CMagicState
+void zeroToggleChargeCost()
 {
-    static auto entity(const CMagicState* state) -> CBattleEntity*
+    if (auto* accession = ability::GetAbility(ABILITY_ACCESSION))
     {
-        return static_cast<const MagicStatePeek*>(state)->m_PEntity;
-    }
-};
-
-auto hookedGetRecast(const CMagicState* state) -> timer::duration
-{
-    if (state == nullptr)
-    {
-        return 0s;
+        accession->setRecastTime(0s);
     }
 
-    auto* PEntity = MagicStatePeek::entity(state);
-    auto* PSpell  = state->GetSpell();
-    if (PEntity == nullptr || PEntity->StatusEffectContainer == nullptr)
+    if (auto* manifestation = ability::GetAbility(ABILITY_MANIFESTATION))
     {
-        return 0s;
-    }
-
-    if (PEntity->StatusEffectContainer->HasStatusEffect(xi::StatusEffect::Chainspell) ||
-        PEntity->StatusEffectContainer->HasStatusEffect(xi::StatusEffect::Spontaneity) ||
-        state->IsInstantCast())
-    {
-        return 0s;
-    }
-
-    auto recast = battleutils::CalculateSpellRecastTime(PEntity, PSpell);
-    if (PSpell != nullptr &&
-        PSpell->getAOE() == SPELLAOE_RADIAL_ACCE &&
-        isPermanentAccession(PEntity))
-    {
-        recast = PEntity->GetMJob() == xi::Job::SCH ? recast / 2 : recast / 3;
-    }
-
-    return recast;
-}
-
-void zeroManifestationChargeCost()
-{
-    if (auto* ability = ability::GetAbility(ABILITY_MANIFESTATION))
-    {
-        ability->setRecastTime(0s);
+        manifestation->setRecastTime(0s);
     }
 }
 
@@ -490,7 +455,7 @@ public:
             lua_register(L, "Ixi20TryMagicSkillchainClose", luaIxi20TryMagicSkillchainClose);
         }
 
-        zeroManifestationChargeCost();
+        zeroToggleChargeCost();
 
         bool ok = true;
         if (!installJump(reinterpret_cast<void*>(&battleutils::CalculateSpellCost),
@@ -500,20 +465,13 @@ public:
             ok = false;
         }
 
-        using RecastFn = timer::duration (CMagicState::*)() const;
-        RecastFn recastFn = &CMagicState::GetRecast;
-        void*    recastPtr = nullptr;
-        static_assert(sizeof(recastFn) >= sizeof(recastPtr), "member pointer smaller than a code pointer");
-        std::memcpy(&recastPtr, &recastFn, sizeof(recastPtr));
-        if (!installJump(recastPtr, reinterpret_cast<const void*>(&hookedGetRecast)))
-        {
-            ShowError("Imagine XI 2.0: caster kit failed to patch spell recast");
-            ok = false;
-        }
+        // Do not trampoline CMagicState::GetRecast. It returns timer::duration, so
+        // MSVC x64 passes a hidden return slot in RCX; a free-function hook then
+        // treats that slot as `this` and crashes in HasStatusEffect on every cast.
 
         if (ok)
         {
-            ShowInfo("Imagine XI 2.0: caster kit loaded (magic closes WS windows; Accession always-on has no tax; Manifestation is free)");
+            ShowInfo("Imagine XI 2.0: caster kit loaded (magic closes WS windows; Accession/Manifestation toggles; Accession has no MP tax)");
         }
     }
 };

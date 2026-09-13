@@ -70,6 +70,7 @@ IMAGINEXI_KIRIN_ADD_INTERVAL_SECONDS = 90
 |---|---|
 | `ixi20_blu_affinity` | Chain Affinity, Burst Affinity, and Diffusion always on from level 1 (main or sub) |
 | `ixi20_blu_damage` | Blue Magic damage retune (skill-based physical, dSTAT nukes, breath uses max HP) |
+| `ixi20_ninjutsu_damage` | NIN-main ninjutsu skill bonus remapped to 75-cap (Ni / San). Ichi and V/M/I stay stock |
 | `ixi20_sch_charges` | Arts + all stratagems at 1; 5×48s charge pool |
 | `ixi20_sch_arts.cpp` | Light or Dark Arts unlocks both schools' stratagems |
 | `ixi20_sch_both_schools` | Other-school tax removed; Addendum White/Black spells work on either stance |
@@ -87,10 +88,11 @@ IMAGINEXI_KIRIN_ADD_INTERVAL_SECONDS = 90
 | `ixi20_level_sync` + `ixi20_gear_sync_scaling.cpp` | Level Sync up or down. The set stays on and scales |
 | `ixi20_debuff_stack` | Dia + Bio together. Poison / Slow / Paralyze / Blind stack by source. Elemental DoTs and helixes stack |
 | `ixi20_bind_kite` | Bind holds through a few hits for kiting |
+| `ixi20_cover.cpp` | Cover intercepts without facing / in-line. 16-yalm leash to the Covered player |
 | `ixi20_infinite_ammo` | Combat ammo is not consumed |
 | `ixi20_ninja_tools.cpp` | Ninjutsu needs no tools |
-| `ixi20_ja_windows` | Cascade 8 min 10% MAB; 45s Manifestation window |
-| `ixi20_caster_kit` | Magic closes existing WS skillchains; Accession always-on for SCH; Manifestation is free |
+| `ixi20_ja_windows` | Cascade 8 min 10% MAB |
+| `ixi20_caster_kit` | Magic closes existing WS skillchains; Accession / Manifestation are toggles |
 | `ixi20_mana_wall` | Mana Wall is a toggle |
 | `ixi20_benediction_mp` | Benediction also restores MP |
 | `ixi20_sp_uptime` | Timed two-hours / one-hours last 2 minutes |

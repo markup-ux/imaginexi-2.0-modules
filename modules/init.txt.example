@@ -29,6 +29,7 @@ custom/sql/ixi20_magic_skill_ranks.sql
 custom/lua/ixi20_blu_affinity.lua
 custom/sql/ixi20_blu_affinity.sql
 custom/lua/ixi20_blu_damage.lua
+custom/lua/ixi20_ninjutsu_damage.lua
 custom/lua/ixi20_sch_charges.lua
 custom/sql/ixi20_sch_charges.sql
 custom/cpp/ixi20_sch_charges.cpp
@@ -53,6 +54,7 @@ custom/lua/ixi20_debuff_stack.lua
 custom/cpp/ixi20_debuff_stack.cpp
 custom/lua/ixi20_bind_kite.lua
 custom/cpp/ixi20_bind_kite.cpp
+custom/cpp/ixi20_cover.cpp
 custom/lua/ixi20_infinite_ammo.lua
 custom/cpp/ixi20_infinite_ammo.cpp
 custom/cpp/ixi20_ninja_tools.cpp
@@ -76,6 +78,7 @@ custom/sql/ixi20_flatten_latents.sql
 custom/lua/ixi20_haste_belts.lua
 custom/sql/ixi20_haste_belts.sql
 custom/lua/ixi20_player_hit.lua
+custom/lua/ixi20_drain_aspir.lua
 custom/lua/ixi20_weakness.lua
 custom/cpp/ixi20_instant_reengage.cpp
 custom/cpp/ixi20_disable_anon.cpp
